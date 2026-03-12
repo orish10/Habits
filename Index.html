@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>לוח הרגלים</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+–bg:       #0e0e10;
+–surface:  #1c1c1e;
+–surface2: #2c2c2e;
+–border:   rgba(255,255,255,0.07);
+–neutral:  #8e8e93;
+
+–green:        #5ebd7e;
+–green-dim:    rgba(94,189,126,0.13);
+–orange:       #d4955a;
+–orange-dim:   rgba(212,149,90,0.13);
+–neutral-dim:  rgba(142,142,147,0.10);
+
+–flag-urgent:    #ff3b30;
+–flag-urgent-bg: rgba(255,59,48,0.15);
+–flag-focus:     #ffd60a;
+–flag-focus-bg:  rgba(255,214,10,0.13);
+–flag-pause:     rgba(142,142,147,0.35);
+–flag-pause-bg:  rgba(142,142,147,0.08);
+
+–radius-card: 18px;
+–radius-chip: 11px;
+–radius-pill: 100px;
+}
+
+html { background: var(–bg); }
+
+body {
+font-family: ‘Heebo’, -apple-system, sans-serif;
+background: var(–bg);
+color: #fff;
+min-height: 100vh;
+padding: 20px 14px 120px;
+overflow-x: hidden;
+}
+
+/* ── Topbar ── */
+.topbar {
+max-width: 680px;
+margin: 0 auto 18px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+.undo-redo { display: flex; gap: 8px; }
+.ur-btn {
+background: var(–surface); border: none; border-radius: 50%;
+color: var(–neutral); font-size: 17px;
+width: 36px; height: 36px; cursor: pointer;
+display: flex; align-items: center; justify-content: center;
+transition: background .15s, color .15s;
+}
+.ur-btn:hover:not(:disabled) { background: var(–surface2); color: #fff; }
+.ur-btn:disabled { opacity: 0.25; cursor: default; }
+
+/* ── Legend row (flag + col) ── */
+.legends {
+max-width: 680px;
+margin: 0 auto 18px;
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+.legends-row {
+display: flex;
+flex-direction: row;
+align-items: stretch;
+gap: 0;
+}
+.col-legend {
+display: grid;
+grid-template-columns: 1fr 1fr 1fr;
+gap: 8px;
+flex: 1;
+}
+.col-legend-header {
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 11px;
+font-weight: 700;
+color: #636366;
+flex-shrink: 0;
+/* width synced via JS to match tab width */
+}
+.col-legend-item {
+display: flex; align-items: center; justify-content: center; gap: 6px;
+padding: 7px 10px; border-radius: var(–radius-pill);
+font-size: 12px; font-weight: 700;
+cursor: pointer;
+transition: opacity .15s, transform .15s;
+}
+.col-legend-item:active { transform: scale(0.96); }
+.col-legend-item.regular { background: var(–green-dim);   color: var(–green); }
+.col-legend-item.current { background: var(–orange-dim);  color: var(–orange); }
+.col-legend-item.future  { background: var(–neutral-dim); color: var(–neutral); }
+.col-legend-item.active-focus { outline: 2px solid currentColor; }
+.col-legend-item.dimmed { opacity: 0.3; }
+.col-legend-item.regular { background: var(–green-dim);   color: var(–green); }
+.col-legend-item.current { background: var(–orange-dim);  color: var(–orange); }
+.col-legend-item.future  { background: var(–neutral-dim); color: var(–neutral); }
+.legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.regular .legend-dot { background: var(–green); }
+.current .legend-dot { background: var(–orange); }
+.future  .legend-dot { background: var(–neutral); }
+
+/* flag legend */
+.flag-legend {
+display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+}
+.flag-legend-item {
+display: flex; align-items: center; gap: 5px;
+font-size: 11px; font-weight: 600; color: var(–neutral);
+background: var(–surface); border-radius: 100px;
+padding: 4px 10px;
+}
+.fl-dot { font-size: 11px; }
+
+.hint {
+max-width: 680px; margin: 0 auto 16px;
+font-size: 11px; color: #3a3a3c; text-align: center;
+}
+
+/* ── Wrapper ── */
+.wrapper { max-width: 680px; margin: 0 auto; }
+
+/* ── Category wrapper (card + side tab) ── */
+.cat-wrapper {
+display: flex;
+flex-direction: row;
+align-items: stretch;
+margin-bottom: 6px;
+border-radius: var(–radius-card);
+overflow: hidden;
+}
+.cat-tab {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+background: var(–surface2);
+min-width: 44px;
+width: auto;
+flex-shrink: 0;
+cursor: pointer;
+transition: background .15s;
+padding: 10px 8px;
+gap: 4px;
+}
+.cat-tab:hover { background: #3a3a3c; }
+.cat-tab-label {
+display: block;
+font-size: 11px;
+font-weight: 700;
+color: #aeaeb2;
+text-align: center;
+word-break: keep-all;
+overflow-wrap: break-word;
+line-height: 1.3;
+}
+.cat-tab-count {
+font-size: 12px;
+font-weight: 700;
+color: #636366;
+}
+.cat-tab-del {
+font-size: 13px;
+color: #48484a;
+line-height: 1;
+margin-top: 2px;
+padding: 2px 4px;
+border-radius: 6px;
+transition: color .15s, background .15s;
+}
+.cat-tab-del:hover { color: #ff3b30; background: rgba(255,59,48,0.15); }
+
+/* ── Category edit mode ── */
+.col-legend-header {
+cursor: pointer;
+transition: color .15s;
+}
+.col-legend-header:hover { color: #aeaeb2; }
+.col-legend-header.edit-active { color: #fff; }
+
+.cat-edit-actions {
+display: none;
+align-items: center;
+justify-content: center;
+gap: 6px;
+padding: 4px 6px 6px;
+}
+body.cat-edit-mode .cat-edit-actions { display: flex; }
+body.cat-edit-mode .cat-tab-count { display: none; }
+body.cat-edit-mode .cat-tab-del { display: none; }
+
+.cat-edit-del {
+font-size: 18px;
+color: #ff3b30;
+width: 28px; height: 28px;
+display: flex; align-items: center; justify-content: center;
+border-radius: 50%;
+background: rgba(255,59,48,0.15);
+cursor: pointer;
+flex-shrink: 0;
+transition: background .15s;
+}
+.cat-edit-del:hover { background: rgba(255,59,48,0.3); }
+.cat-edit-pencil {
+font-size: 14px;
+color: #aeaeb2;
+width: 28px; height: 28px;
+display: flex; align-items: center; justify-content: center;
+border-radius: 50%;
+background: var(–surface);
+cursor: pointer;
+flex-shrink: 0;
+transition: background .15s;
+}
+.cat-edit-pencil:hover { background: #3a3a3c; color: #fff; }
+
+/* cat drag ghost */
+#cat-drag-ghost {
+position: fixed; pointer-events: none;
+background: var(–surface2); border-radius: 10px;
+padding: 7px 14px;
+font-family: ‘Heebo’, sans-serif; font-size: 13px; font-weight: 700; color: #fff;
+z-index: 9998; max-width: 160px; text-align: center;
+box-shadow: 0 8px 30px rgba(0,0,0,0.7); display: none;
+}
+.cat-wrapper.cat-dragging { opacity: 0.3; }
+.cat-wrapper.cat-drag-above { border-top: 2px solid rgba(255,255,255,0.3); }
+.cat-wrapper.cat-drag-below { border-bottom: 2px solid rgba(255,255,255,0.3); }
+
+/* ── Category card ── */
+.category-card {
+background: var(–surface);
+flex: 1;
+min-width: 0;
+overflow: hidden;
+}
+.cat-header {
+display: flex; align-items: center; justify-content: flex-end;
+padding: 4px 8px;
+border-bottom: 1px solid var(–border);
+}
+.cat-name { font-size: 14px; font-weight: 700; letter-spacing: -0.2px; flex: 1; }
+.cat-counts { display: none; }
+.cat-header-wrap { }
+
+/* ── 3-col grid ── */
+.cat-cols { display: grid; grid-template-columns: 1fr 1fr 1fr; width: 100%; }
+.col {
+padding: 8px 7px 5px;
+border-left: 1px solid var(–border);
+min-height: 40px; position: relative;
+min-width: 0;
+overflow: hidden;
+}
+.col:last-child { border-left: none; }
+.col.drag-over { background: rgba(255,255,255,0.04); }
+
+/* ── Chip ── */
+.chip {
+display: flex; align-items: flex-start; gap: 5px;
+padding: 6px 8px;
+border-radius: var(–radius-chip);
+font-size: 11.5px; font-weight: 500; line-height: 1.35;
+margin-bottom: 5px; word-break: break-word;
+cursor: default;
+transition: opacity .15s, transform .15s, background .2s, outline .2s;
+position: relative;
+outline: 1.5px solid transparent;
+min-width: 0; width: 100%;
+}
+
+/* Column base colors */
+.col.regular .chip { background: var(–green-dim);   color: var(–green); }
+.col.current .chip { background: var(–orange-dim);  color: var(–orange); }
+.col.future  .chip { background: var(–neutral-dim); color: var(–neutral); }
+
+/* Flag overrides */
+.chip[data-flag=“urgent”] {
+background: var(–flag-urgent-bg) !important;
+color: var(–flag-urgent) !important;
+outline-color: rgba(255,59,48,0.4);
+}
+.chip[data-flag=“focus”] {
+box-shadow: 0 0 0 2.5px rgba(255,255,255,0.55) !important;
+outline: none !important;
+}
+.chip[data-flag=“pause”] {
+background: transparent !important;
+color: #6e6e73 !important;
+outline: none !important;
+border: 1.5px dashed #48484a !important;
+opacity: 1;
+}
+.chip[data-flag=“focus-pause”], .chip[data-flag=“pause-focus”] {
+box-shadow: 0 0 0 2.5px rgba(255,255,255,0.55) !important;
+background: transparent !important;
+color: #6e6e73 !important;
+border: 1.5px dashed #48484a !important;
+outline: none !important;
+opacity: 1;
+}
+
+.chip.dragging { opacity: 0.2; transform: scale(0.94); }
+
+/* Flag icon inside chip */
+.chip-flag {
+flex-shrink: 0;
+font-size: 11px;
+line-height: 1.4;
+margin-top: 0;
+}
+.chip-text { flex: 1; text-align: center; }
+
+/* ── Flag picker popup ── */
+.flag-picker {
+position: fixed;
+background: #2c2c2e;
+border-radius: 14px;
+padding: 6px;
+display: flex;
+gap: 4px;
+z-index: 10000;
+box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+animation: popIn .15s ease;
+}
+@keyframes popIn {
+from { opacity: 0; transform: scale(0.85) translateY(4px); }
+to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.fp-btn {
+background: var(–surface);
+border: none; border-radius: 10px;
+padding: 10px;
+cursor: pointer;
+display: flex; align-items: center; justify-content: center;
+transition: background .12s;
+min-width: 44px; min-height: 44px;
+}
+.fp-btn:hover { background: #3a3a3c; }
+.fp-btn.active { background: #3a3a3c; outline: 1.5px solid rgba(255,255,255,0.15); }
+.fp-btn.fp-danger .fp-icon { color: #ff3b30; }
+.fp-btn.fp-danger:hover { background: rgba(255,59,48,0.15); }
+.fp-icon { font-size: 20px; color: #fff; }
+.fp-focus .fp-icon { font-size: 26px; }
+.fp-label { display: none; }
+
+.delete-confirm-picker { padding: 5px; }
+.delete-confirm-picker .fp-btn {
+min-width: 80px;
+justify-content: center;
+border-radius: 10px;
+}
+.dp-delete-label {
+font-family: ‘Heebo’, sans-serif;
+font-size: 15px;
+font-weight: 600;
+color: #ff3b30;
+}
+
+/* ── Drag ghost ── */
+#drag-ghost {
+position: fixed; pointer-events: none;
+background: var(–surface2); border-radius: 10px;
+padding: 7px 14px;
+font-family: ‘Heebo’, sans-serif; font-size: 13px; font-weight: 600; color: #fff;
+z-index: 9999; max-width: 200px; text-align: center;
+box-shadow: 0 8px 30px rgba(0,0,0,0.7); display: none;
+}
+
+/* ── Edit mode ── */
+.chip.editing { background: var(–surface2) !important; color: #fff !important; outline-color: rgba(255,255,255,0.2); }
+.chip-input {
+background: none; border: none;
+font-family: ‘Heebo’, sans-serif; font-size: 12px; font-weight: 500;
+color: #fff; text-align: center; outline: none;
+width: 100%; resize: none; overflow: hidden;
+-webkit-user-select: text; user-select: text;
+}
+
+/* ── Add row ── */
+.add-row {
+display: flex; align-items: center; gap: 4px;
+margin-top: 2px; padding: 2px;
+border-radius: 8px; transition: background .15s;
+}
+.add-row:focus-within { background: var(–surface2); }
+.add-inp {
+flex: 1; background: none; border: none;
+font-family: ‘Heebo’, sans-serif; font-size: 12px; color: #fff;
+outline: none; padding: 4px 6px; min-width: 0;
+-webkit-user-select: text; user-select: text;
+}
+.add-inp::placeholder { color: #3a3a3c; }
+.add-done-btn {
+display: none;
+background: var(–surface2); border: none; border-radius: 7px;
+color: var(–neutral); font-family: ‘Heebo’, sans-serif;
+font-size: 11px; font-weight: 600; padding: 3px 8px;
+cursor: pointer; white-space: nowrap; flex-shrink: 0;
+transition: background .12s, color .12s;
+}
+.add-done-btn:hover { background: #3a3a3c; color: #fff; }
+.add-row:focus-within .add-done-btn { display: block; }
+
+/* ── Add category ── */
+.add-cat-bar { display: flex; gap: 8px; margin-top: 6px; }
+.add-cat-inp {
+flex: 1; background: var(–surface); border: none; border-radius: 14px;
+padding: 11px 16px; color: #fff;
+font-family: ‘Heebo’, sans-serif; font-size: 14px; outline: none;
+-webkit-user-select: text; user-select: text;
+}
+.add-cat-inp::placeholder { color: #3a3a3c; }
+.add-cat-btn {
+background: var(–surface2); border: none; border-radius: 14px;
+color: var(–neutral); font-family: ‘Heebo’, sans-serif;
+font-size: 14px; font-weight: 600; padding: 11px 18px;
+cursor: pointer; transition: background .12s, color .12s;
+}
+.add-cat-btn:hover { background: #3a3a3c; color: #fff; }
+
+.cat-header { cursor: pointer; }
+.collapse-btn {
+margin-right: auto;
+background: none;
+border: none;
+color: #48484a;
+font-size: 18px;
+line-height: 1;
+cursor: pointer;
+padding: 0 2px;
+transition: color .15s, transform .2s;
+display: flex;
+align-items: center;
+}
+.collapse-btn:hover { color: #8e8e93; }
+
+/* ── Delete confirm ── */
+.confirm-overlay {
+position: fixed; inset: 0;
+background: rgba(0,0,0,0.6);
+display: flex; align-items: center; justify-content: center;
+z-index: 1000;
+backdrop-filter: blur(4px);
+}
+.confirm-box {
+background: #1c1c1e;
+border: 1px solid rgba(255,255,255,0.08);
+border-radius: 18px;
+padding: 22px 20px 16px;
+width: 270px;
+text-align: center;
+font-family: ‘Heebo’, sans-serif;
+}
+.confirm-title {
+font-size: 16px; font-weight: 700; color: #fff;
+margin-bottom: 8px;
+}
+.confirm-text {
+font-size: 13px; color: #8e8e93; margin-bottom: 18px;
+line-height: 1.5;
+}
+.confirm-text strong { color: #fff; }
+.confirm-btns {
+display: flex; gap: 10px;
+}
+.confirm-cancel, .confirm-ok {
+flex: 1; padding: 11px; border: none; border-radius: 12px;
+font-size: 14px; font-weight: 600; font-family: ‘Heebo’, sans-serif;
+cursor: pointer;
+}
+.confirm-cancel { background: #2c2c2e; color: #8e8e93; }
+.confirm-ok     { background: rgba(255,59,48,0.15); color: #ff3b30; }
+
+/* ── Focus mode ── */
+body.focus-mode .add-row { display: none; }
+body.focus-mode .add-cat-bar { display: none; }
+
+body.focus-0 .col.current, body.focus-0 .col.future  { opacity: 0.25; pointer-events: none; }
+body.focus-1 .col.regular, body.focus-1 .col.future  { opacity: 0.25; pointer-events: none; }
+body.focus-2 .col.regular, body.focus-2 .col.current { opacity: 0.25; pointer-events: none; }
+
+@media (max-width: 480px) {
+.chip { font-size: 11px; padding: 5px 7px; }
+.col  { padding: 8px 7px 5px; }
+}
+
+/* ── Undo toast ── */
+#undo-toast {
+position: fixed;
+bottom: 28px;
+left: 50%;
+transform: translateX(-50%) translateY(80px);
+background: #2c2c2e;
+border: 1px solid rgba(255,255,255,0.1);
+border-radius: 16px;
+padding: 10px 8px 10px 16px;
+display: flex;
+align-items: center;
+gap: 10px;
+font-family: ‘Heebo’, sans-serif;
+font-size: 13px;
+font-weight: 500;
+color: #e0e0e0;
+white-space: nowrap;
+box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+z-index: 20000;
+transition: transform 0.28s cubic-bezier(0.34,1.4,0.64,1), opacity 0.28s ease;
+opacity: 0;
+pointer-events: none;
+}
+#undo-toast.show {
+transform: translateX(-50%) translateY(0);
+opacity: 1;
+pointer-events: all;
+}
+#undo-toast .toast-undo-btn {
+background: rgba(255,255,255,0.1);
+border: none;
+border-radius: 10px;
+color: #fff;
+font-family: ‘Heebo’, sans-serif;
+font-size: 13px;
+font-weight: 700;
+padding: 5px 12px;
+cursor: pointer;
+transition: background 0.12s;
+flex-shrink: 0;
+}
+#undo-toast .toast-undo-btn:hover { background: rgba(255,255,255,0.18); }
+</style>
+
+</head>
+<body>
+
+<div class="topbar">
+  <h1>הרגלים O</h1>
+  <div class="undo-redo">
+    <button class="ur-btn" id="undoBtn" onclick="undo()" title="אחורה (Ctrl+Z)" disabled>↺</button>
+    <button class="ur-btn" id="redoBtn" onclick="redo()" title="קדימה (Ctrl+Y)" disabled>↻</button>
+  </div>
+</div>
+
+<div class="legends">
+  <div class="legends-row">
+    <div class="col-legend-header" id="catLegendHeader">קטגוריה</div>
+    <div class="col-legend">
+      <div class="col-legend-item regular"><div class="legend-dot"></div>ברגיל</div>
+      <div class="col-legend-item current"><div class="legend-dot"></div>בתהליך</div>
+      <div class="col-legend-item future" ><div class="legend-dot"></div>לשפר בעתיד</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrapper">
+  <div id="board"></div>
+  <div class="add-cat-bar">
+    <input class="add-cat-inp" id="newCatInput" placeholder="+ קטגוריה חדשה..." />
+    <button class="add-cat-btn" onclick="addCategory()">הוסף</button>
+  </div>
+</div>
+
+<div id="undo-toast">
+  <span id="toast-msg">בוצע</span>
+  <button class="toast-undo-btn" onclick="toastUndo()">ביטול</button>
+</div>
+<div id="drag-ghost"></div>
+<div id="cat-drag-ghost"></div>
+
+<script>
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// ── Flag cycle: null → focus → urgent → pause → null ────────
+const FLAG_CYCLE = [null, 'focus', 'urgent', 'pause'];
+const FLAG_ICON  = {};
+
+// ── Default data ─────────────────────────────────────────────
+// Each item: { t: "text", f: null|"urgent"|"focus"|"pause" }
+function mkItems(arr) { return arr.map(t => ({ t, f: null })); }
+
+const DEFAULT = [];
+
+// ── Migrate old string-based saves ──────────────────────────
+function migrate(d) {
+  d.forEach(cat => {
+    cat.cols = cat.cols.map(col =>
+      col.map(item => typeof item === 'string' ? { t: item, f: null } : item)
+    );
+  });
+  return d;
+}
+
+// ── History ──────────────────────────────────────────────────
+const MAX_HIST = 80;
+let history = [], histIdx = -1;
+
+function snapshot() {
+  history = history.slice(0, histIdx + 1);
+  history.push(JSON.parse(JSON.stringify(data)));
+  if (history.length > MAX_HIST) history.shift();
+  histIdx = history.length - 1;
+  updateUR();
+}
+function undo() {
+  if (histIdx <= 0) return;
+  histIdx--;
+  data = JSON.parse(JSON.stringify(history[histIdx]));
+  persist(); render(); updateUR();
+}
+function redo() {
+  if (histIdx >= history.length - 1) return;
+  // check if the state we're redoing INTO is a delete relative to current
+  const next = history[histIdx + 1];
+  const curr = history[histIdx];
+  const nextCount = next.reduce((s, c) => s + c.cols.reduce((a, col) => a + col.length, 0), 0);
+  const currCount = curr.reduce((s, c) => s + c.cols.reduce((a, col) => a + col.length, 0), 0);
+  if (nextCount < currCount) {
+    showRedoDeleteConfirm(() => { histIdx++; data = JSON.parse(JSON.stringify(history[histIdx])); persist(); render(); updateUR(); });
+  } else {
+    histIdx++;
+    data = JSON.parse(JSON.stringify(history[histIdx]));
+    persist(); render(); updateUR();
+  }
+}
+function updateUR() {
+  document.getElementById('undoBtn').disabled = histIdx <= 0;
+  document.getElementById('redoBtn').disabled = histIdx >= history.length - 1;
+}
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey) && e.key==='z' && !e.shiftKey) { e.preventDefault(); undo(); }
+  if ((e.ctrlKey||e.metaKey) && (e.key==='y'||(e.key==='z'&&e.shiftKey))) { e.preventDefault(); redo(); }
+});
+
+// ── Persistence ──────────────────────────────────────────────
+function persist() { localStorage.setItem('hb8', JSON.stringify(data)); }
+function load()    { try { return JSON.parse(localStorage.getItem('hb8')) || null; } catch { return null; } }
+
+let raw = load();
+let data = raw ? migrate(raw) : JSON.parse(JSON.stringify(DEFAULT));
+history = [JSON.parse(JSON.stringify(data))];
+histIdx = 0; updateUR();
+
+function compact(d) {
+  d.forEach(cat => {
+    cat.cols = cat.cols.map(col => col.filter(item => item && item.t && item.t.trim()));
+  });
+}
+
+function toggleCollapse(ci) {
+  data[ci].collapsed = !data[ci].collapsed;
+  persist(); render();
+}
+
+// ── Toast ─────────────────────────────────────────────────────
+let toastTimer = null;
+
+function showToast(msg) {
+  const toast = document.getElementById('undo-toast');
+  document.getElementById('toast-msg').textContent = msg;
+  clearTimeout(toastTimer);
+  toast.classList.add('show');
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+function toastUndo() {
+  document.getElementById('undo-toast').classList.remove('show');
+  clearTimeout(toastTimer);
+  undo();
+}
+
+function commit(msg) {
+  compact(data); persist(); snapshot(); render();
+  showToast(msg || 'בוצע');
+}
+
+// ── Flag picker ──────────────────────────────────────────────
+let activePicker = null;
+
+function openFlagPicker(chip, ci, ki, ii, currentFlag, habitText) {
+  closeFlagPicker();
+
+  const picker = document.createElement('div');
+  picker.className = 'flag-picker';
+  picker.id = 'flagPicker';
+
+  const isFocused = currentFlag === 'focus' || currentFlag === 'focus-pause';
+  const isPaused  = currentFlag === 'pause'  || currentFlag === 'focus-pause';
+
+  const options = [
+    isFocused
+      ? { flag: 'unfocus', icon: '✕',  label: 'הסר הדגשה', skip: false }
+      : { flag: 'focus',   icon: '*',  label: 'מודגש', cls: 'fp-focus', skip: false },
+    isPaused
+      ? { flag: 'unpause', icon: '▶',  label: 'המשך',       skip: false }
+      : { flag: 'pause',   icon: '⏸', label: 'מושהה',      skip: false },
+    { flag: 'delete', icon: '⊗', label: 'מחק', skip: false, danger: true },
+  ];
+
+  options.filter(opt => !opt.skip).forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'fp-btn' + (opt.danger ? ' fp-danger' : '') + (opt.cls ? ' ' + opt.cls : '');
+    btn.innerHTML = `<span class="fp-icon">${opt.icon}</span><span class="fp-label">${opt.label}</span>`;
+    btn.addEventListener('mousedown', e => e.preventDefault());
+    btn.addEventListener('click', () => {
+      if (opt.flag === 'delete') {
+        const _ci = ci, _ki = ki, _ii = ii;
+        closeFlagPicker();
+        setTimeout(() => {
+          showDeleteConfirm(habitText, () => {
+            data[_ci].cols[_ki].splice(_ii, 1);
+            commit('הרגל נמחק');
+          });
+        }, 50);
+      } else if (opt.flag === 'pause') {
+        // add pause, keep focus if present
+        data[ci].cols[ki][ii].f = isFocused ? 'focus-pause' : 'pause';
+        commit('הרגל הושהה');
+      } else if (opt.flag === 'unpause') {
+        // remove pause, keep focus if present
+        data[ci].cols[ki][ii].f = isFocused ? 'focus' : null;
+        commit('הרגל חודש');
+      } else if (opt.flag === 'focus') {
+        // add focus, keep pause if present
+        data[ci].cols[ki][ii].f = isPaused ? 'focus-pause' : 'focus';
+        commit('סומן כמודגש');
+      } else if (opt.flag === 'unfocus') {
+        // remove focus, keep pause if present
+        data[ci].cols[ki][ii].f = isPaused ? 'pause' : null;
+        commit('הדגשה הוסרה');
+      } else {
+        data[ci].cols[ki][ii].f = opt.flag;
+        commit('בוצע');
+      }
+      closeFlagPicker();
+    });
+    picker.appendChild(btn);
+  });
+
+  document.body.appendChild(picker);
+  activePicker = picker;
+  activePicker._chip = chip;
+
+  const rect = chip.getBoundingClientRect();
+  const pw = picker.offsetWidth;
+  const ph = picker.offsetHeight;
+
+  // position:fixed uses viewport coords — no scrollY needed
+  let left = rect.left + rect.width / 2 - pw / 2;
+  let top  = rect.bottom + 4;
+
+  left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
+  if (rect.bottom + 4 + ph > window.innerHeight) top = rect.top - ph - 4;
+
+  picker.style.top  = top + 'px';
+  picker.style.left = left + 'px';
+  _confirmPickerPos = { top, chipCx: rect.left + rect.width / 2 };
+}
+
+function openChipEdit(chip, ci, ki, ii) {
+  const text = data[ci].cols[ki][ii].t;
+  chip.classList.add('editing');
+  chip.innerHTML = '';
+  const inp = document.createElement('textarea');
+  inp.className = 'chip-input';
+  inp.value = text;
+  inp.rows = 1;
+  chip.appendChild(inp);
+  // Allow text selection inside input
+  inp.style.webkitUserSelect = 'text';
+  inp.style.userSelect = 'text';
+  inp.focus(); inp.select();
+  const finish = () => {
+    const val = inp.value.trim();
+    if (!val) { data[ci].cols[ki].splice(ii, 1); commit('הרגל נמחק'); }
+    else      { data[ci].cols[ki][ii].t = val;   commit('הרגל עודכן'); }
+  };
+  inp.addEventListener('blur', finish);
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); inp.blur(); }
+    if (e.key === 'Escape') { inp.value = text; inp.blur(); }
+  });
+}
+
+function closeFlagPicker() {
+  if (activePicker) { activePicker.remove(); activePicker = null; }
+}
+
+document.addEventListener('pointerdown', e => {
+  if (activePicker && !activePicker.contains(e.target)) closeFlagPicker();
+});
+
+// ── Drag ─────────────────────────────────────────────────────
+let drag = null, longPressTimer = null;
+const LONG_MS = 480;
+const ghost   = document.getElementById('drag-ghost');
+
+function startDrag(ci, ki, ii, el, text, x, y) {
+  closeFlagPicker();
+  drag = { ci, ki, ii, el };
+  el.classList.add('dragging');
+  ghost.textContent = text;
+  ghost.style.display = 'block';
+  moveGhost(x, y);
+}
+function moveGhost(x, y) {
+  ghost.style.left = (x - ghost.offsetWidth / 2) + 'px';
+  ghost.style.top  = (y - 50) + 'px';
+}
+function endDrag(tci, tki) {
+  if (!drag) return;
+  const { ci, ki, ii, el } = drag;
+  el.classList.remove('dragging');
+  ghost.style.display = 'none';
+  clearDragOver();
+  // Only allow drag within the same category
+  if (tci !== null && tci === ci && tki !== ki) {
+    const item = data[ci].cols[ki].splice(ii, 1)[0];
+    // Clear pause flag when moved out of future col
+    if (item.f === 'pause') item.f = null;
+    data[ci].cols[tki].push(item);
+    commit('הרגל הועבר');
+  }
+  drag = null;
+}
+function cancelDrag() {
+  if (!drag) return;
+  drag.el.classList.remove('dragging');
+  ghost.style.display = 'none';
+  drag = null;
+  clearDragOver();
+}
+function clearDragOver() {
+  document.querySelectorAll('.col.drag-over').forEach(c => c.classList.remove('drag-over'));
+}
+
+document.addEventListener('mousemove', e => { if (drag) { moveGhost(e.clientX, e.clientY); clearDragOver(); const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('.col'); if (over && parseInt(over.dataset.ci) === drag.ci) over.classList.add('drag-over'); } });
+document.addEventListener('mouseup',   () => { clearTimeout(longPressTimer); if (drag) cancelDrag(); });
+
+// ── Category edit mode ───────────────────────────────────────
+let catEditMode = false;
+const catLegendHeader = document.getElementById('catLegendHeader');
+catLegendHeader.addEventListener('click', () => {
+  catEditMode = !catEditMode;
+  document.body.classList.toggle('cat-edit-mode', catEditMode);
+  catLegendHeader.classList.toggle('edit-active', catEditMode);
+});
+
+function openCatRename(ci, labelEl) {
+  const inp = document.createElement('input');
+  inp.value = data[ci].name;
+  inp.style.cssText = `background:none;border:none;outline:none;font-family:Heebo,sans-serif;font-size:11px;font-weight:700;color:#fff;text-align:center;width:100%;-webkit-user-select:text;user-select:text;`;
+  labelEl.replaceWith(inp);
+  inp.focus(); inp.select();
+  const finish = () => {
+    const v = inp.value.trim();
+    if (v && v !== data[ci].name) { data[ci].name = v; commit('שם קטגוריה עודכן'); } else render();
+  };
+  inp.addEventListener('blur', finish);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); if (e.key === 'Escape') { inp.value = data[ci].name; inp.blur(); } });
+}
+
+// ── Category drag (sorting) ──────────────────────────────────
+let catDrag = null;
+const catGhost = document.getElementById('cat-drag-ghost');
+
+// insert-line indicator
+const catInsertLine = document.createElement('div');
+catInsertLine.style.cssText = `
+  position:fixed; left:0; right:0; height:3px;
+  background: rgba(255,255,255,0.7);
+  border-radius:2px; z-index:9997; pointer-events:none;
+  display:none;
+  box-shadow: 0 0 8px rgba(255,255,255,0.4);
+`;
+document.body.appendChild(catInsertLine);
+
+function startCatDrag(ci, tabEl, startY) {
+  const wrappers = Array.from(document.querySelectorAll('.cat-wrapper'));
+  const el = wrappers[ci];
+  const rect = el.getBoundingClientRect();
+
+  // snapshot original positions
+  const origRects = wrappers.map(w => w.getBoundingClientRect());
+
+  // make dragged element fixed
+  el.style.cssText += `
+    position:fixed;
+    top:${rect.top}px; left:${rect.left}px;
+    width:${rect.width}px;
+    z-index:9999;
+    box-shadow:0 12px 40px rgba(0,0,0,0.8);
+    opacity:0.97;
+    transition:none;
+    pointer-events:none;
+    margin:0;
+  `;
+
+  // placeholder to keep space
+  const placeholder = document.createElement('div');
+  placeholder.style.cssText = `height:${rect.height}px; margin-bottom:6px; flex-shrink:0;`;
+  el.parentNode.insertBefore(placeholder, el);
+
+  catDrag = { ci, el, placeholder, origRects, startY, fixedTop: rect.top, insertIdx: ci };
+  moveFloatingCat(startY);
+}
+
+function moveFloatingCat(y) {
+  if (!catDrag) return;
+  const { el, origRects, ci, startY, fixedTop } = catDrag;
+
+  // move dragged element
+  const newTop = fixedTop + (y - startY);
+  el.style.top = newTop + 'px';
+  const centerY = newTop + origRects[ci].height / 2;
+
+  // find insert index using ORIGINAL rects (before any transforms)
+  // imagine all items in original positions, where does centerY fall?
+  let insertIdx = 0;
+  for (let i = 0; i < origRects.length; i++) {
+    if (i === ci) continue;
+    const mid = origRects[i].top + origRects[i].height / 2;
+    if (centerY > mid) {
+      insertIdx = i >= ci ? i : i;
+    }
+  }
+  // if centerY is above everything, insertIdx stays 0 unless ci=0
+  // recalculate cleanly: find first item whose mid is above centerY
+  insertIdx = ci; // default: no move
+  let found = false;
+  // build list of indices excluding ci
+  const others = origRects.map((r, i) => i).filter(i => i !== ci);
+  for (let j = 0; j < others.length; j++) {
+    const i = others[j];
+    const mid = origRects[i].top + origRects[i].height / 2;
+    if (centerY <= mid) {
+      // insert before i
+      insertIdx = i > ci ? i - 1 : i;
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    // below everything
+    insertIdx = origRects.length - 1;
+  }
+  insertIdx = Math.max(0, Math.min(data.length - 1, insertIdx));
+  catDrag.insertIdx = insertIdx;
+
+  // shift other wrappers
+  const wrappers = Array.from(document.querySelectorAll('.cat-wrapper'));
+  const dragH = origRects[ci].height + 6;
+  wrappers.forEach((w, i) => {
+    if (i === ci) return;
+    let shift = 0;
+    if (ci < insertIdx && i > ci && i <= insertIdx) shift = -dragH;
+    if (ci > insertIdx && i >= insertIdx && i < ci) shift = dragH;
+    w.style.transform = `translateY(${shift}px)`;
+    w.style.transition = 'transform 0.18s ease';
+  });
+
+  // insert line
+  if (insertIdx === ci) { catInsertLine.style.display = 'none'; return; }
+  let lineY;
+  if (insertIdx < ci) {
+    lineY = origRects[insertIdx].top;
+  } else {
+    lineY = origRects[insertIdx].bottom + 3;
+  }
+  catInsertLine.style.display = 'block';
+  catInsertLine.style.top = lineY + 'px';
+}
+
+function endCatDrag(y) {
+  if (!catDrag) return;
+  const { el, placeholder, ci, insertIdx } = catDrag;
+
+  // cleanup
+  catInsertLine.style.display = 'none';
+  el.style.cssText = '';
+  placeholder.remove();
+  document.querySelectorAll('.cat-wrapper').forEach(w => {
+    w.style.transform = '';
+    w.style.transition = '';
+  });
+
+  catDrag = null;
+
+  if (insertIdx !== ci) {
+    const [item] = data.splice(ci, 1);
+    data.splice(insertIdx, 0, item);
+    commit('קטגוריה הוזזה');
+  } else {
+    render();
+  }
+}
+
+// ── Render ───────────────────────────────────────────────────
+function render() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+
+  data.forEach((cat, ci) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'cat-wrapper';
+
+    // Side tab with category name + dynamic count
+    const tab = document.createElement('div');
+    tab.className = 'cat-tab';
+    tab.dataset.ci = ci;
+
+    // Long press → drag (for sorting), short press → collapse
+    let tabPressTimer = null, tabDragging = false;
+    tab.addEventListener('pointerdown', e => {
+      if (catEditMode) return;
+      tabDragging = false;
+      tabPressTimer = setTimeout(() => {
+        tabPressTimer = null;
+        tabDragging = true;
+        startCatDrag(ci, tab, e.clientY);
+      }, 500);
+    }, { passive: true });
+    tab.addEventListener('touchmove', e => {
+      if (!tabDragging) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      moveFloatingCat(t.clientY);
+    }, { passive: false });
+    tab.addEventListener('touchend', e => {
+      if (tabDragging) { endCatDrag(e.changedTouches[0].clientY); tabDragging = false; return; }
+      if (tabPressTimer) { clearTimeout(tabPressTimer); tabPressTimer = null; toggleCollapse(ci); }
+    });
+    tab.addEventListener('touchcancel', () => {
+      clearTimeout(tabPressTimer); tabPressTimer = null;
+      if (tabDragging) { tabDragging = false; catDrag = null; catGhost.style.display = 'none'; document.querySelectorAll('.cat-wrapper').forEach(w => w.classList.remove('cat-dragging','cat-drag-above','cat-drag-below')); render(); }
+    });
+    tab.addEventListener('pointermove', e => {
+      if (!tabDragging) {
+        if (Math.abs(e.movementY) > 4) { clearTimeout(tabPressTimer); tabPressTimer = null; }
+        return;
+      }
+      moveFloatingCat(e.clientY);
+    });
+    tab.addEventListener('pointerup', e => {
+      if (tabDragging) { endCatDrag(e.clientY); tabDragging = false; return; }
+      if (tabPressTimer) { clearTimeout(tabPressTimer); tabPressTimer = null; toggleCollapse(ci); }
+    });
+    tab.addEventListener('pointercancel', () => {
+      clearTimeout(tabPressTimer); tabPressTimer = null;
+      if (tabDragging) { tabDragging = false; catDrag = null; catGhost.style.display = 'none'; document.querySelectorAll('.cat-wrapper').forEach(w => w.classList.remove('cat-dragging','cat-drag-above','cat-drag-below')); render(); }
+    });
+
+    const tabLabel = document.createElement('span');
+    tabLabel.className = 'cat-tab-label';
+    tabLabel.textContent = cat.name;
+    tab.appendChild(tabLabel);
+
+    // Count
+    const tabCount = document.createElement('span');
+    tabCount.className = 'cat-tab-count';
+    if (focusCol !== null) {
+      tabCount.textContent = (cat.cols[focusCol] || []).length;
+      tabCount.style.color = ['var(--green)', 'var(--orange)', 'var(--neutral)'][focusCol];
+    } else {
+      tabCount.textContent = cat.cols.reduce((s, c) => s + c.length, 0);
+    }
+    tab.appendChild(tabCount);
+
+    // Edit mode actions (delete + pencil)
+    const editActions = document.createElement('div');
+    editActions.className = 'cat-edit-actions';
+
+    const delBtn = document.createElement('div');
+    delBtn.className = 'cat-edit-del';
+    delBtn.textContent = '×';
+    delBtn.addEventListener('pointerdown', e => e.stopPropagation());
+    delBtn.addEventListener('click', e => { e.stopPropagation(); showCatDeleteConfirm(ci, tab); });
+
+    const pencilBtn = document.createElement('div');
+    pencilBtn.className = 'cat-edit-pencil';
+    pencilBtn.textContent = '✏️';
+    pencilBtn.addEventListener('pointerdown', e => e.stopPropagation());
+    pencilBtn.addEventListener('click', e => { e.stopPropagation(); openCatRename(ci, tabLabel); });
+
+    editActions.appendChild(delBtn);
+    editActions.appendChild(pencilBtn);
+    tab.appendChild(editActions);
+
+    const card = document.createElement('div');
+    card.className = 'category-card';
+
+    if (cat.collapsed && focusCol === null) { wrapper.appendChild(tab); wrapper.appendChild(card); board.appendChild(wrapper); return; }
+
+    const colsEl = document.createElement('div');
+    colsEl.className = 'cat-cols';
+
+    [0, 1, 2].forEach(ki => {
+      const colClass = ['regular', 'current', 'future'][ki];
+      const col = document.createElement('div');
+      col.className = `col ${colClass}`;
+      col.dataset.ci = ci; col.dataset.ki = ki;
+
+      // drag-over handled in chip pointermove
+
+      (cat.cols[ki] || []).forEach((item, ii) => {
+        const text = item.t;
+        const flag = item.f || null;
+
+        const chip = document.createElement('div');
+        chip.className = 'chip';
+        if (flag) chip.dataset.flag = flag;
+
+        // Flag icon
+        if (flag && FLAG_ICON[flag]) {
+          const iconEl = document.createElement('span');
+          iconEl.className = 'chip-flag';
+          iconEl.textContent = FLAG_ICON[flag];
+          chip.appendChild(iconEl);
+        }
+        const textEl = document.createElement('span');
+        textEl.className = 'chip-text';
+        textEl.textContent = text;
+        chip.appendChild(textEl);
+
+        chip.dataset.ci = ci;
+        chip.dataset.ki = ki;
+        chip.dataset.ii = ii;
+
+        // ── Tap → flag picker / Long press → drag ──
+        let isDragging = false;
+        let pressStartX = 0, pressStartY = 0;
+
+        // MOUSE
+        let pickerWasOpen = false;
+        chip.addEventListener('mousedown', e => {
+          if (e.button !== 0) return;
+          e.preventDefault();
+          pickerWasOpen = !!(activePicker && activePicker._chip === chip);
+          isDragging = false;
+          pressStartX = e.clientX; pressStartY = e.clientY;
+          clearTimeout(longPressTimer);
+          if (focusCol !== null) return;
+          longPressTimer = setTimeout(() => {
+            isDragging = true;
+            startDrag(ci, ki, ii, chip, text, e.clientX, e.clientY);
+          }, LONG_MS);
+        });
+        chip.addEventListener('mousemove', e => {
+          if (Math.abs(e.clientX - pressStartX) > 6 || Math.abs(e.clientY - pressStartY) > 6)
+            clearTimeout(longPressTimer);
+        });
+        let pendingPicker = null;
+        chip.addEventListener('mouseup', () => {
+          clearTimeout(longPressTimer);
+          if (drag) {
+            const over = document.querySelector('.col.drag-over');
+            if (over) endDrag(parseInt(over.dataset.ci), parseInt(over.dataset.ki));
+            else cancelDrag();
+            return;
+          }
+          if (isDragging) { isDragging = false; return; }
+          isDragging = false;
+          clearTimeout(pendingPicker);
+          if (pickerWasOpen) {
+            closeFlagPicker();
+          } else {
+            pendingPicker = setTimeout(() => {
+              const _ci = parseInt(chip.dataset.ci), _ki = parseInt(chip.dataset.ki), _ii = parseInt(chip.dataset.ii);
+              openFlagPicker(chip, _ci, _ki, _ii, data[_ci].cols[_ki][_ii]?.f || null, data[_ci].cols[_ki][_ii]?.t || '');
+            }, 0);
+          }
+        });
+
+        chip.addEventListener('dblclick', e => {
+          e.stopPropagation();
+          clearTimeout(pendingPicker);
+          closeFlagPicker();
+          openChipEdit(chip, ci, ki, ii);
+        });
+
+        // TOUCH
+        chip.addEventListener('touchstart', e => {
+          isDragging = false;
+          const t = e.touches[0];
+          pressStartX = t.clientX; pressStartY = t.clientY;
+          clearTimeout(longPressTimer);
+          if (focusCol !== null) return;
+          longPressTimer = setTimeout(() => {
+            isDragging = true;
+            startDrag(ci, ki, ii, chip, text, t.clientX, t.clientY);
+          }, LONG_MS);
+        }, { passive: true });
+
+        chip.addEventListener('touchmove', e => {
+          const t = e.touches[0];
+          const dx = Math.abs(t.clientX - pressStartX);
+          const dy = Math.abs(t.clientY - pressStartY);
+          if (dx > 6 || dy > 6) clearTimeout(longPressTimer);
+          if (!drag) return; // allow scroll if not dragging
+          e.preventDefault();
+          moveGhost(t.clientX, t.clientY);
+          clearDragOver();
+          const el = document.elementFromPoint(t.clientX, t.clientY);
+          const over = el && el.closest('.col');
+          if (over && parseInt(over.dataset.ci) === drag.ci) over.classList.add('drag-over');
+        }, { passive: false });
+
+        chip.addEventListener('touchend', e => {
+          clearTimeout(longPressTimer);
+          if (drag) {
+            const over = document.querySelector('.col.drag-over');
+            if (over) endDrag(parseInt(over.dataset.ci), parseInt(over.dataset.ki));
+            else cancelDrag();
+            return;
+          }
+          const t = e.changedTouches[0];
+          const dy = Math.abs(t.clientY - pressStartY);
+          if (!isDragging && dy < 8) {
+            const _ci = parseInt(chip.dataset.ci), _ki = parseInt(chip.dataset.ki), _ii = parseInt(chip.dataset.ii);
+            openFlagPicker(chip, _ci, _ki, _ii, data[_ci].cols[_ki][_ii]?.f || null, data[_ci].cols[_ki][_ii]?.t || '');
+          }
+          isDragging = false;
+        });
+
+        chip.addEventListener('touchcancel', () => { clearTimeout(longPressTimer); cancelDrag(); });
+
+        col.appendChild(chip);
+      });
+
+      // ── Add row (hidden in focus mode) ──
+      if (focusCol === null) {
+        const addRow = document.createElement('div');
+        addRow.className = 'add-row';
+        const addInp = document.createElement('input');
+        addInp.className = 'add-inp';
+        addInp.placeholder = '+';
+
+        const doneBtn = document.createElement('button');
+        doneBtn.className = 'add-done-btn';
+        doneBtn.textContent = 'סיום';
+        doneBtn.addEventListener('mousedown', e => e.preventDefault());
+        doneBtn.addEventListener('click', () => submitAdd(addInp, ci, ki));
+
+        addInp.addEventListener('paste', e => {
+          e.preventDefault();
+          const txt = (e.clipboardData || window.clipboardData).getData('text');
+          const lines = txt.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+          if (lines.length <= 1) { addInp.value = txt.trim(); return; }
+          lines.forEach(l => data[ci].cols[ki].push({ t: l, f: null }));
+          commit(`${lines.length} הרגלים נוספו`);
+        });
+        addInp.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); submitAdd(addInp, ci, ki); }
+        });
+        addInp.addEventListener('blur', () => submitAdd(addInp, ci, ki));
+
+        addRow.appendChild(addInp);
+        addRow.appendChild(doneBtn);
+        col.appendChild(addRow);
+      }
+      colsEl.appendChild(col);
+    });
+
+    card.appendChild(colsEl);
+    wrapper.appendChild(tab);
+    wrapper.appendChild(card);
+    board.appendChild(wrapper);
+  });
+
+  // Equalize all tab widths to the widest one
+  const tabs = board.querySelectorAll('.cat-tab');
+  let maxW = 0;
+  tabs.forEach(t => { t.style.width = 'auto'; maxW = Math.max(maxW, t.offsetWidth); });
+  tabs.forEach(t => { t.style.width = maxW + 'px'; });
+
+  // Sync legend header width
+  const hdr = document.getElementById('catLegendHeader');
+  if (hdr) {
+    if (maxW > 0) {
+      hdr.style.width = maxW + 'px';
+      hdr.style.visibility = 'visible';
+    } else {
+      hdr.style.visibility = 'hidden';
+      hdr.style.width = '0px';
+    }
+  }
+}
+
+function submitAdd(inp, ci, ki) {
+  const val = inp.value.trim();
+  if (!val) return;
+  data[ci].cols[ki].push({ t: val, f: null });
+  commit('הרגל נוסף');
+  inp.value = '';
+  setTimeout(() => {
+    const all = document.querySelectorAll(`.category-card:nth-child(${ci+1}) .add-inp`);
+    if (all[ki]) all[ki].focus();
+  }, 30);
+}
+
+function addCategory() {
+  const inp = document.getElementById('newCatInput');
+  const name = inp.value.trim();
+  if (!name) return;
+  data.push({ name, cols: [[], [], []] });
+  commit('קטגוריה נוספה'); inp.value = '';
+}
+
+document.getElementById('newCatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addCategory();
+});
+
+
+
+let _confirmPickerPos = { top: 0, chipCx: 0 };
+
+function showCatDeleteConfirm(ci, tabEl) {
+  document.getElementById('catDeletePicker')?.remove();
+  const rect = tabEl.getBoundingClientRect();
+  const picker = document.createElement('div');
+  picker.className = 'flag-picker delete-confirm-picker';
+  picker.id = 'catDeletePicker';
+  picker.innerHTML = `<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק קטגוריה</span></button>`;
+  picker.style.top  = '-9999px';
+  picker.style.left = '-9999px';
+  document.body.appendChild(picker);
+  const pw = picker.offsetWidth, ph = picker.offsetHeight;
+  let left = rect.left - pw - 6;
+  let top  = rect.top + rect.height / 2 - ph / 2;
+  if (left < 8) left = rect.right + 6;
+  top = Math.max(8, Math.min(top, window.innerHeight - ph - 8));
+  picker.style.top  = top  + 'px';
+  picker.style.left = left + 'px';
+  const onOutside = e => {
+    if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); }
+  };
+  setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 50);
+  picker.querySelector('.dp-ok').addEventListener('click', () => {
+    picker.remove(); document.removeEventListener('pointerdown', onOutside, true);
+    data.splice(ci, 1);
+    commit('קטגוריה נמחקה');
+  });
+}
+
+function showDeleteConfirm(habitText, onConfirm) {
+  document.getElementById('deletePicker')?.remove();
+
+  const picker = document.createElement('div');
+  picker.className = 'flag-picker delete-confirm-picker';
+  picker.id = 'deletePicker';
+  picker.innerHTML = `<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק</span></button>`;
+  picker.style.top = _confirmPickerPos.top + 'px';
+  picker.style.left = '-9999px'; // hidden until measured
+  document.body.appendChild(picker);
+
+  // center horizontally around chip center
+  const pw = picker.offsetWidth;
+  const left = Math.max(8, Math.min(_confirmPickerPos.chipCx - pw / 2, window.innerWidth - pw - 8));
+  picker.style.left = left + 'px';
+
+  const onOutside = e => {
+    if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); }
+  };
+  setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 50);
+
+  picker.querySelector('.dp-ok').addEventListener('click', () => {
+    picker.remove(); document.removeEventListener('pointerdown', onOutside, true);
+    onConfirm();
+  });
+}
+
+function showRedoDeleteConfirm(onConfirm) {
+  document.getElementById('redoConfirmPicker')?.remove();
+  const btn = document.getElementById('redoBtn');
+  const rect = btn.getBoundingClientRect();
+
+  const picker = document.createElement('div');
+  picker.className = 'flag-picker delete-confirm-picker';
+  picker.id = 'redoConfirmPicker';
+  picker.innerHTML = `<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק שוב</span></button>`;
+  picker.style.top  = '-9999px';
+  picker.style.left = '-9999px';
+  document.body.appendChild(picker);
+
+  const pw = picker.offsetWidth;
+  const ph = picker.offsetHeight;
+  let left = rect.left + rect.width / 2 - pw / 2;
+  let top  = rect.bottom + 6;
+  left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
+  if (top + ph > window.innerHeight) top = rect.top - ph - 6;
+  picker.style.top  = top  + 'px';
+  picker.style.left = left + 'px';
+
+  const onOutside = e => {
+    if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); }
+  };
+  setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 50);
+
+  picker.querySelector('.dp-ok').addEventListener('click', () => {
+    picker.remove(); document.removeEventListener('pointerdown', onOutside, true);
+    onConfirm();
+  });
+}
+
+// ── Focus mode ───────────────────────────────────────────────
+let focusCol = null;
+
+function setFocusCol(ki) {
+  const items = document.querySelectorAll('.col-legend-item');
+  if (focusCol === ki) {
+    focusCol = null;
+    document.body.classList.remove('focus-mode', 'focus-0', 'focus-1', 'focus-2');
+    items.forEach(el => el.classList.remove('active-focus', 'dimmed'));
+  } else {
+    focusCol = ki;
+    document.body.className = `focus-mode focus-${ki}`;
+    items.forEach((el, i) => {
+      el.classList.toggle('active-focus', i === ki);
+      el.classList.toggle('dimmed', i !== ki);
+    });
+  }
+  render();
+}
+
+document.querySelectorAll('.col-legend-item').forEach((el, i) => {
+  el.addEventListener('click', () => setFocusCol(i));
+});
+
+render();
+</script>
+
+</body>
+</html>
