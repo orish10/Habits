@@ -39,13 +39,13 @@
 –radius-pill: 100px;
 }
 
-html, body { background: #0e0e10 !important; }
-
+html { background: #0e0e10 !important; min-height: 100%; }
 body {
 font-family: ‘Heebo’, -apple-system, sans-serif;
-background: var(–bg);
+background: #0e0e10 !important;
 color: #fff;
 min-height: 100vh;
+min-height: 100dvh;
 padding: 20px 14px 120px;
 overflow-x: hidden;
 }
@@ -288,12 +288,14 @@ transition: opacity .15s, transform .15s, background .2s, outline .2s;
 position: relative;
 outline: 1.5px solid transparent;
 min-width: 0; width: 100%;
+-webkit-appearance: none;
+-webkit-transform: translateZ(0);
 }
 
 /* Column base colors */
-.col.regular .chip { background: var(–green-dim);   color: var(–green); }
-.col.current .chip { background: var(–orange-dim);  color: var(–orange); }
-.col.future  .chip { background: var(–neutral-dim); color: var(–neutral); }
+.col.regular .chip { background: #1a3d28; color: #5ebd7e; }
+.col.current .chip { background: #3d2a0e; color: #d4955a; }
+.col.future  .chip { background: #222224; color: #8e8e93; }
 
 /* Flag overrides */
 .chip[data-flag=“urgent”] {
