@@ -41,7 +41,14 @@ display: -webkit-flex; display: flex;
 -webkit-justify-content: space-between; justify-content: space-between;
 }
 h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #ffffff; }
-.undo-redo { display: -webkit-flex; display: flex; gap: 8px; }
+.undo-redo {
+display: -webkit-flex; display: flex;
+gap: 8px;
+position: absolute;
+left: 50%;
+-webkit-transform: translateX(-50%); transform: translateX(-50%);
+}
+.topbar { position: relative; }
 .ur-btn {
 background: #1c1c1e;
 border-radius: 50%;
@@ -548,7 +555,7 @@ display: -webkit-flex; display: flex;
 <body>
 
 <div class="topbar">
-  <h1>הרגלים v52</h1>
+  <h1>הרגלים v57</h1>
   <div class="undo-redo">
     <button class="ur-btn" id="undoBtn" onclick="undo()" title="אחורה (Ctrl+Z)" disabled>↺</button>
     <button class="ur-btn" id="redoBtn" onclick="redo()" title="קדימה (Ctrl+Y)" disabled>↻</button>
@@ -590,7 +597,6 @@ display: -webkit-flex; display: flex;
   <span id="bulk-count">0 נבחרו</span>
   <div class="bulk-btn" onclick="bulkAction('focus')">הדגש</div>
   <div class="bulk-btn" onclick="bulkAction('pause')">השהה</div>
-  <div class="bulk-btn" onclick="bulkAction('move')">העבר ▸</div>
   <div class="bulk-btn bulk-danger" onclick="bulkAction('delete')">מחק</div>
   <div class="bulk-btn" id="bulk-done" onclick="exitSelectMode()" style="background:#3a3a3c;color:#fff;display:none;">סיום</div>
 </div>
@@ -677,22 +683,30 @@ document.addEventListener('keydown', e => {
 
 // ── Persistence ──────────────────────────────────────────────
 function persist() {
-  const json = JSON.stringify(data);
-  try { localStorage.setItem('hb8', json); } catch(e) { console.warn('localStorage failed', e); }
-  try { sessionStorage.setItem('hb8', json); } catch(e) {}
+  try {
+    const json = JSON.stringify(data);
+    localStorage.setItem('hb8', json);
+    localStorage.setItem('hb8_ts', Date.now()); // verify write succeeded
+  } catch(e) {
+    console.warn('persist failed', e);
+  }
 }
 function load() {
   try {
-    const ls = localStorage.getItem('hb8');
-    if (ls) { console.log('loaded from localStorage, items:', JSON.parse(ls).length); return JSON.parse(ls); }
-  } catch(e) { console.warn('localStorage load failed', e); }
-  try {
-    const ss = sessionStorage.getItem('hb8');
-    if (ss) { console.log('loaded from sessionStorage'); return JSON.parse(ss); }
-  } catch(e) {}
-  console.log('no saved data found');
+    const raw = localStorage.getItem('hb8');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      console.log('loaded from localStorage, categories:', parsed.length);
+      return parsed;
+    }
+  } catch(e) { console.warn('load failed', e); }
+  console.log('no saved data');
   return null;
 }
+
+// Save on page hide (iOS reliable)
+window.addEventListener('pagehide', () => { try { localStorage.setItem('hb8', JSON.stringify(data)); } catch(e) {} });
+window.addEventListener('beforeunload', () => { try { localStorage.setItem('hb8', JSON.stringify(data)); } catch(e) {} });
 
 let raw = load();
 let data = raw ? migrate(raw) : JSON.parse(JSON.stringify(DEFAULT));
@@ -875,13 +889,26 @@ function endDrag(tci, tki) {
   el.classList.remove('dragging');
   ghost.style.display = 'none';
   clearDragOver();
-  // Only allow drag within the same category
+
   if (tci !== null && tci === ci && tki !== ki) {
-    const item = data[ci].cols[ki].splice(ii, 1)[0];
-    // Clear pause flag when moved out of future col
-    if (item.f === 'pause') item.f = null;
-    data[ci].cols[tki].push(item);
-    commit('הרגל הועבר');
+    const draggedKey = data[ci].cols[ki][ii]?._key;
+    const isDraggedSelected = draggedKey && selected.includes(draggedKey);
+
+    if (selectMode && isDraggedSelected && selected.length > 1) {
+      // Move all selected chips in this category to target column
+      const resolved = selected.map(k => findItem(k)).filter(Boolean).filter(item => item.ci === ci);
+      const sorted = resolved.sort((a,b) => b.ki-a.ki || b.ii-a.ii);
+      sorted.forEach(({ci:c, ki:k, ii:i}) => {
+        const item = data[c].cols[k].splice(i, 1)[0];
+        data[c].cols[tki].push(item);
+      });
+      commit(resolved.length + ' הרגלים הועברו');
+      document.getElementById('bulk-done').style.display = 'block';
+    } else {
+      const item = data[ci].cols[ki].splice(ii, 1)[0];
+      data[ci].cols[tki].push(item);
+      commit('הרגל הועבר');
+    }
   }
   drag = null;
 }
@@ -1200,7 +1227,18 @@ function render() {
 
     card.appendChild(overlay);
 
-    if (cat.collapsed && focusCol === null) { wrapper.appendChild(tab); wrapper.appendChild(card); board.appendChild(wrapper); return; }
+    if (cat.collapsed && focusCol === null) {
+      card.style.position = 'relative';
+      card.style.minHeight = '44px';
+      card.style.cursor = 'pointer';
+      const chevron = document.createElement('div');
+      chevron.style.cssText = 'position:absolute;inset:0;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;font-size:32px;color:#636366;pointer-events:none;line-height:1;padding-top:4px;';
+      chevron.textContent = '⌄';
+      card.appendChild(chevron);
+      card.addEventListener('click', () => toggleCollapse(ci));
+      card.addEventListener('touchend', e => { e.preventDefault(); toggleCollapse(ci); });
+      wrapper.appendChild(tab); wrapper.appendChild(card); board.appendChild(wrapper); return;
+    }
 
     const colsEl = document.createElement('div');
     colsEl.className = 'cat-cols';
