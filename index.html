@@ -228,8 +228,7 @@ box-shadow: 0 0 0 2.5px rgba(255,255,255,0.6) !important;
 background: rgba(40,40,42,0.5) !important;
 color: #6e6e73 !important;
 border: 1.5px dashed #48484a !important;
-}
-.chip[data-flag=“urgent”] {
+}.chip[data-flag=“urgent”] {
 background: rgba(255,59,48,0.2) !important;
 color: #ff3b30 !important;
 }
@@ -398,7 +397,7 @@ cursor: pointer;
 <body>
 
 <div class="topbar">
-  <h1>הרגלים O v16</h1>
+  <h1>הרגלים O v19</h1>
   <div class="undo-redo">
     <button class="ur-btn" id="undoBtn" onclick="undo()" title="אחורה (Ctrl+Z)" disabled>↺</button>
     <button class="ur-btn" id="redoBtn" onclick="redo()" title="קדימה (Ctrl+Y)" disabled>↻</button>
@@ -552,16 +551,16 @@ function handlePickerAction(opt, ci, ki, ii, isFocused, isPaused, habitText) {
       });
     }, 50);
   } else if (opt.flag === 'pause') {
-    data[ci].cols[ki][ii].f = isFocused ? 'focus-pause' : 'pause';
+    data[ci].cols[ki][ii].f = 'pause';
     commit('הרגל הושהה'); closeFlagPicker();
   } else if (opt.flag === 'unpause') {
-    data[ci].cols[ki][ii].f = isFocused ? 'focus' : null;
+    data[ci].cols[ki][ii].f = null;
     commit('הרגל חודש'); closeFlagPicker();
   } else if (opt.flag === 'focus') {
-    data[ci].cols[ki][ii].f = isPaused ? 'focus-pause' : 'focus';
+    data[ci].cols[ki][ii].f = 'focus';
     commit('סומן כמודגש'); closeFlagPicker();
   } else if (opt.flag === 'unfocus') {
-    data[ci].cols[ki][ii].f = isPaused ? 'pause' : null;
+    data[ci].cols[ki][ii].f = null;
     commit('הדגשה הוסרה'); closeFlagPicker();
   } else {
     data[ci].cols[ki][ii].f = opt.flag;
@@ -978,6 +977,19 @@ function render() {
         chip.className = 'chip';
         if (flag) chip.dataset.flag = flag;
 
+        // Apply flag styles inline for Safari
+        if (flag === 'focus') {
+          chip.style.webkitBoxShadow = '0 0 0 2.5px rgba(255,255,255,0.6)';
+          chip.style.boxShadow = '0 0 0 2.5px rgba(255,255,255,0.6)';
+        } else if (flag === 'pause') {
+          chip.style.background = '#28282a';
+          chip.style.color = '#6e6e73';
+          chip.style.border = '1.5px dashed #48484a';
+        } else if (flag === 'urgent') {
+          chip.style.background = 'rgba(255,59,48,0.2)';
+          chip.style.color = '#ff3b30';
+        }
+
         // Flag icon
         if (flag && FLAG_ICON[flag]) {
           const iconEl = document.createElement('span');
@@ -1300,16 +1312,20 @@ render();
 // ── Reload feedback ──────────────────────────────────────────
 try {
   if (window.location.search.includes('t=')) {
-    const btn = document.querySelector('.ur-btn[title="רענון"]');
-    if (btn) {
-      btn.textContent = '✓';
-      btn.style.color = '#5ebd7e';
-      setTimeout(() => {
-        btn.textContent = '⟳';
-        btn.style.color = '';
-        try { window.history.replaceState(null, '', window.location.pathname); } catch(e) {}
-      }, 2000);
-    }
+    const toast = document.createElement('div');
+    toast.textContent = '✓';
+    toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.5);background:#1c1c1e;color:#5ebd7e;font-size:48px;width:90px;height:90px;border-radius:24px;display:flex;align-items:center;justify-content:center;z-index:99999;opacity:0;transition:all 0.2s cubic-bezier(0.34,1.4,0.64,1);box-shadow:0 8px 32px rgba(0,0,0,0.6);pointer-events:none;';
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translate(-50%,-50%) scale(1)';
+    });
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translate(-50%,-50%) scale(0.8)';
+      setTimeout(() => toast.remove(), 300);
+    }, 1200);
+    try { window.history.replaceState(null, '', window.location.pathname); } catch(e) {}
   }
 } catch(e) {}
 </script>
