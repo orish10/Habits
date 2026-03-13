@@ -12,7 +12,23 @@
   -webkit-user-select: none; user-select: none;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  border: 0;
+  font: inherit;
+  vertical-align: baseline;
+  list-style: none;
+  quotes: none;
 }
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  line-height: 1;
+}
+body { line-height: 1; }
+div, span, input, button { -webkit-appearance: none; appearance: none; }
+button { background: none; cursor: pointer; }
+input { background: none; outline: none; }
+a { color: inherit; text-decoration: none; }
 
 :root {
 –bg:       #0e0e10;
@@ -278,7 +294,7 @@ overflow: hidden;
 
 /* ── Chip ── */
 .chip {
-display: flex; align-items: flex-start; gap: 5px;
+display: block;
 padding: 6px 8px;
 border-radius: var(–radius-chip);
 font-size: 11.5px; font-weight: 500; line-height: 1.35;
@@ -287,7 +303,7 @@ cursor: default;
 transition: opacity .15s, transform .15s, background .2s, outline .2s;
 position: relative;
 outline: 1.5px solid transparent;
-min-width: 0; width: 100%;
+text-align: center;
 -webkit-appearance: none;
 -webkit-transform: translateZ(0);
 }
@@ -557,7 +573,7 @@ flex-shrink: 0;
 <body>
 
 <div class="topbar">
-  <h1>הרגלים O v2</h1>
+  <h1>הרגלים O v4</h1>
   <div class="undo-redo">
     <button class="ur-btn" id="undoBtn" onclick="undo()" title="אחורה (Ctrl+Z)" disabled>↺</button>
     <button class="ur-btn" id="redoBtn" onclick="redo()" title="קדימה (Ctrl+Y)" disabled>↻</button>
