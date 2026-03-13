@@ -214,23 +214,23 @@ width: 100%;
 .col.future  .chip { background: #222224; color: #8e8e93; }
 
 .chip[data-flag=“focus”] {
--webkit-box-shadow: 0 0 0 2.5px rgba(255,255,255,0.55);
-box-shadow: 0 0 0 2.5px rgba(255,255,255,0.55);
+-webkit-box-shadow: 0 0 0 2.5px rgba(255,255,255,0.6) !important;
+box-shadow: 0 0 0 2.5px rgba(255,255,255,0.6) !important;
 }
 .chip[data-flag=“pause”] {
-background: transparent !important;
+background: rgba(40,40,42,0.5) !important;
 color: #6e6e73 !important;
-border: 1.5px dashed #48484a;
+border: 1.5px dashed #48484a !important;
 }
 .chip[data-flag=“focus-pause”], .chip[data-flag=“pause-focus”] {
--webkit-box-shadow: 0 0 0 2.5px rgba(255,255,255,0.55);
-box-shadow: 0 0 0 2.5px rgba(255,255,255,0.55);
-background: transparent !important;
+-webkit-box-shadow: 0 0 0 2.5px rgba(255,255,255,0.6) !important;
+box-shadow: 0 0 0 2.5px rgba(255,255,255,0.6) !important;
+background: rgba(40,40,42,0.5) !important;
 color: #6e6e73 !important;
-border: 1.5px dashed #48484a;
+border: 1.5px dashed #48484a !important;
 }
 .chip[data-flag=“urgent”] {
-background: rgba(255,59,48,0.15) !important;
+background: rgba(255,59,48,0.2) !important;
 color: #ff3b30 !important;
 }
 .chip.dragging { opacity: 0.2; -webkit-transform: scale(0.94); transform: scale(0.94); }
@@ -398,7 +398,7 @@ cursor: pointer;
 <body>
 
 <div class="topbar">
-  <h1>הרגלים O v12</h1>
+  <h1>הרגלים O v16</h1>
   <div class="undo-redo">
     <button class="ur-btn" id="undoBtn" onclick="undo()" title="אחורה (Ctrl+Z)" disabled>↺</button>
     <button class="ur-btn" id="redoBtn" onclick="redo()" title="קדימה (Ctrl+Y)" disabled>↻</button>
@@ -541,6 +541,34 @@ function commit(msg) {
 // ── Flag picker ──────────────────────────────────────────────
 let activePicker = null;
 
+function handlePickerAction(opt, ci, ki, ii, isFocused, isPaused, habitText) {
+  if (opt.flag === 'delete') {
+    const _ci = ci, _ki = ki, _ii = ii;
+    closeFlagPicker();
+    setTimeout(() => {
+      showDeleteConfirm(habitText, () => {
+        data[_ci].cols[_ki].splice(_ii, 1);
+        commit('הרגל נמחק');
+      });
+    }, 50);
+  } else if (opt.flag === 'pause') {
+    data[ci].cols[ki][ii].f = isFocused ? 'focus-pause' : 'pause';
+    commit('הרגל הושהה'); closeFlagPicker();
+  } else if (opt.flag === 'unpause') {
+    data[ci].cols[ki][ii].f = isFocused ? 'focus' : null;
+    commit('הרגל חודש'); closeFlagPicker();
+  } else if (opt.flag === 'focus') {
+    data[ci].cols[ki][ii].f = isPaused ? 'focus-pause' : 'focus';
+    commit('סומן כמודגש'); closeFlagPicker();
+  } else if (opt.flag === 'unfocus') {
+    data[ci].cols[ki][ii].f = isPaused ? 'pause' : null;
+    commit('הדגשה הוסרה'); closeFlagPicker();
+  } else {
+    data[ci].cols[ki][ii].f = opt.flag;
+    commit('בוצע'); closeFlagPicker();
+  }
+}
+
 function openFlagPicker(chip, ci, ki, ii, currentFlag, habitText) {
   closeFlagPicker();
 
@@ -567,36 +595,12 @@ function openFlagPicker(chip, ci, ki, ii, currentFlag, habitText) {
     btn.innerHTML = `<span class="fp-icon">${opt.icon}</span><span class="fp-label">${opt.label}</span>`;
     btn.addEventListener('mousedown', e => e.preventDefault());
     btn.addEventListener('click', () => {
-      if (opt.flag === 'delete') {
-        const _ci = ci, _ki = ki, _ii = ii;
-        closeFlagPicker();
-        setTimeout(() => {
-          showDeleteConfirm(habitText, () => {
-            data[_ci].cols[_ki].splice(_ii, 1);
-            commit('הרגל נמחק');
-          });
-        }, 50);
-      } else if (opt.flag === 'pause') {
-        // add pause, keep focus if present
-        data[ci].cols[ki][ii].f = isFocused ? 'focus-pause' : 'pause';
-        commit('הרגל הושהה');
-      } else if (opt.flag === 'unpause') {
-        // remove pause, keep focus if present
-        data[ci].cols[ki][ii].f = isFocused ? 'focus' : null;
-        commit('הרגל חודש');
-      } else if (opt.flag === 'focus') {
-        // add focus, keep pause if present
-        data[ci].cols[ki][ii].f = isPaused ? 'focus-pause' : 'focus';
-        commit('סומן כמודגש');
-      } else if (opt.flag === 'unfocus') {
-        // remove focus, keep pause if present
-        data[ci].cols[ki][ii].f = isPaused ? 'pause' : null;
-        commit('הדגשה הוסרה');
-      } else {
-        data[ci].cols[ki][ii].f = opt.flag;
-        commit('בוצע');
-      }
-      closeFlagPicker();
+      handlePickerAction(opt, ci, ki, ii, isFocused, isPaused, habitText);
+    });
+    btn.addEventListener('touchend', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      handlePickerAction(opt, ci, ki, ii, isFocused, isPaused, habitText);
     });
     picker.appendChild(btn);
   });
