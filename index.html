@@ -71,7 +71,7 @@ display: -webkit-flex; display: flex;
 .col-legend {
 display: -webkit-flex; display: flex;
 -webkit-flex: 1; flex: 1;
-gap: 8px;
+-webkit-align-items: stretch; align-items: stretch;
 }
 .col-legend-item {
 -webkit-flex: 1; flex: 1;
@@ -79,31 +79,31 @@ display: -webkit-flex; display: flex;
 -webkit-align-items: center; align-items: center;
 -webkit-justify-content: center; justify-content: center;
 gap: 6px;
-padding: 7px 10px;
-border-radius: 100px;
+padding: 7px 4px;
+border-radius: 0;
 font-size: 12px; font-weight: 700;
 cursor: pointer;
 }
-.col-legend-item.regular { background: #1a3d28; color: #5ebd7e; }
-.col-legend-item.current { background: #3d2a0e; color: #d4955a; }
-.col-legend-item.future  { background: #222224; color: #8e8e93; }
+.col-legend-header {
+display: -webkit-flex; display: flex;
+-webkit-flex: 1; flex: 1;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+font-size: 11px; font-weight: 700;
+color: #636366;
+cursor: pointer;
+padding: 7px 4px;
+}
+.col-legend-header.edit-active { color: #ffffff; }
+.col-legend-item.regular { background: #1a3d28; color: #5ebd7e; border-radius: 100px; margin: 3px 2px; }
+.col-legend-item.current { background: #3d2a0e; color: #d4955a; border-radius: 100px; margin: 3px 2px; }
+.col-legend-item.future  { background: #222224; color: #8e8e93; border-radius: 100px; margin: 3px 2px; }
 .col-legend-item.active-focus { outline: 2px solid currentColor; }
 .col-legend-item.dimmed { opacity: 0.3; }
 .legend-dot { width: 7px; height: 7px; border-radius: 50%; -webkit-flex-shrink: 0; flex-shrink: 0; }
 .regular .legend-dot { background: #5ebd7e; }
 .current .legend-dot { background: #d4955a; }
 .future  .legend-dot { background: #8e8e93; }
-
-.col-legend-header {
-display: -webkit-flex; display: flex;
--webkit-align-items: center; align-items: center;
--webkit-justify-content: center; justify-content: center;
-font-size: 11px; font-weight: 700;
-color: #636366;
--webkit-flex-shrink: 0; flex-shrink: 0;
-cursor: pointer;
-}
-.col-legend-header.edit-active { color: #ffffff; }
 
 /* ── Wrapper ── */
 .wrapper { max-width: 680px; margin: 0 auto; }
@@ -123,41 +123,67 @@ display: -webkit-flex; display: flex;
 -webkit-align-items: center; align-items: center;
 -webkit-justify-content: center; justify-content: center;
 background: #2c2c2e;
-min-width: 44px;
+-webkit-flex: 1; flex: 1;
 -webkit-flex-shrink: 0; flex-shrink: 0;
 cursor: pointer;
-padding: 10px 8px;
+padding: 10px 4px;
 gap: 4px;
+min-width: 0;
 }
 .cat-tab-label {
 display: block;
 font-size: 11px; font-weight: 700;
-color: #aeaeb2;
+color: #636366;
 text-align: center;
 line-height: 1.3;
+word-break: break-all;
+overflow: hidden;
+max-height: 80px;
 }
+body.cat-edit-mode .cat-tab-label { display: none; }
+body.cat-edit-mode .cat-tab-count { display: none; }
 .cat-tab-count {
 font-size: 12px; font-weight: 700;
 color: #636366;
 }
 .cat-edit-actions {
 display: none;
+-webkit-flex-direction: column; flex-direction: column;
 -webkit-align-items: center; align-items: center;
 -webkit-justify-content: center; justify-content: center;
 gap: 6px;
-padding: 4px 6px 6px;
+padding: 6px 0;
 }
+body.cat-edit-mode .col-legend-item { pointer-events: none; opacity: 0.35; }
 body.cat-edit-mode .cat-edit-actions { display: -webkit-flex; display: flex; }
-body.cat-edit-mode .cat-tab-count { display: none; }
+body.cat-edit-mode .chip,
+body.cat-edit-mode .add-row,
+body.cat-edit-mode .add-cat-bar { pointer-events: none; opacity: 0.35; }
+body.cat-edit-mode .cat-tab { pointer-events: auto; opacity: 1; }
 .cat-edit-del {
-font-size: 18px; color: #ff3b30;
 width: 28px; height: 28px;
+border-radius: 50%;
+border: 2px solid #48484a;
+background: transparent;
+cursor: pointer;
+-webkit-box-sizing: border-box; box-sizing: border-box;
+-webkit-flex-shrink: 0; flex-shrink: 0;
+position: relative;
+}
+.cat-edit-del.cat-first { opacity: 0.2; pointer-events: none; }
+.cat-edit-del.cat-selected-check {
+background: #ff3b30;
+border-color: #ff3b30;
+}
+.cat-edit-del.cat-selected-check::after {
+content: ‘✓’;
+position: absolute;
+inset: 0;
 display: -webkit-flex; display: flex;
 -webkit-align-items: center; align-items: center;
 -webkit-justify-content: center; justify-content: center;
-border-radius: 50%;
-background: rgba(255,59,48,0.2);
-cursor: pointer;
+font-size: 13px; font-weight: 700;
+color: #fff;
 }
 .cat-edit-pencil {
 font-size: 14px; color: #aeaeb2;
@@ -170,12 +196,52 @@ background: #1c1c1e;
 cursor: pointer;
 }
 
+.cat-edit-overlay {
+display: none;
+position: absolute;
+inset: 0;
+background: rgba(0,0,0,0.3);
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+font-size: 14px; font-weight: 700;
+color: #ffffff;
+z-index: 5;
+border-radius: 0 18px 18px 0;
+pointer-events: none;
+}
+body.cat-edit-mode .cat-edit-overlay {
+display: -webkit-flex; display: flex;
+pointer-events: auto;
+cursor: text;
+}
+.cat-wrapper.cat-selected { outline: 2px solid rgba(255,59,48,0.5); }
+.cat-wrapper.cat-selected .cat-tab { background: rgba(255,59,48,0.22) !important; }
+.cat-wrapper.cat-selected .category-card { background: rgba(255,59,48,0.15) !important; }
+.cat-wrapper.cat-selected .cat-edit-overlay { background: transparent; }
+
+#cat-delete-bar {
+display: none;
+position: fixed;
+bottom: 0; left: 0; right: 0;
+background: #1c1c1e;
+border-top: 1px solid rgba(255,255,255,0.1);
+padding: 14px 20px 32px;
+font-family: ‘Heebo’, sans-serif;
+font-size: 14px; font-weight: 700;
+color: #ff3b30;
+text-align: center;
+cursor: pointer;
+z-index: 30000;
+}
+body.cat-edit-mode #cat-delete-bar { display: block; }
+#cat-delete-bar.no-selection { color: #636366; pointer-events: none; }
 /* ── Category card ── */
 .category-card {
 background: #1c1c1e;
--webkit-flex: 1; flex: 1;
+-webkit-flex: 3; flex: 3;
 min-width: 0;
 overflow: hidden;
+position: relative;
 }
 
 /* ── 3-col grid ── */
@@ -391,24 +457,110 @@ padding: 5px 12px;
 cursor: pointer;
 -webkit-flex-shrink: 0; flex-shrink: 0;
 }
+/* ── Select mode ── */
+.ur-btn.select-active { background: #3a3a3c; color: #fff; }
+body.select-mode .chip { cursor: pointer; padding-right: 28px; position: relative; }
+body.select-mode .chip::before {
+content: ‘’;
+position: absolute;
+right: 6px; top: 50%;
+-webkit-transform: translateY(-50%); transform: translateY(-50%);
+width: 18px; height: 18px;
+border-radius: 50%;
+border: 2px solid #636366;
+background: transparent;
+-webkit-box-sizing: border-box; box-sizing: border-box;
+}
+body.select-mode .chip.selected::before {
+background: #ff3b30;
+border-color: #ff3b30;
+}
+body.select-mode .chip.selected::after {
+content: ‘✓’;
+position: absolute;
+right: 6px; top: 50%;
+-webkit-transform: translateY(-50%); transform: translateY(-50%);
+width: 18px; height: 18px;
+line-height: 18px;
+text-align: center;
+font-size: 11px;
+font-weight: 700;
+color: #fff;
+}
+#bulk-bar {
+position: fixed;
+bottom: 0; left: 0; right: 0;
+background: #1c1c1e;
+border-top: 1px solid rgba(255,255,255,0.1);
+padding: 12px 16px 28px;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+gap: 8px;
+z-index: 30000;
+-webkit-transform: translateY(100%); transform: translateY(100%);
+-webkit-transition: transform 0.25s; transition: transform 0.25s;
+}
+#bulk-bar.show {
+-webkit-transform: translateY(0); transform: translateY(0);
+}
+#bulk-count {
+font-family: ‘Heebo’, sans-serif;
+font-size: 13px; font-weight: 600;
+color: #8e8e93;
+-webkit-flex-shrink: 0; flex-shrink: 0;
+min-width: 36px;
+}
+.bulk-btn {
+-webkit-flex: 1; flex: 1;
+background: #2c2c2e;
+border-radius: 12px;
+padding: 10px 6px;
+font-family: ‘Heebo’, sans-serif;
+font-size: 12px; font-weight: 600;
+color: #fff;
+text-align: center;
+cursor: pointer;
+}
+.bulk-btn.bulk-danger { color: #ff3b30; background: rgba(255,59,48,0.15); }
+.bulk-btn.bulk-move-sub {
+font-size: 11px;
+padding: 8px 4px;
+}
+#bulk-move-row {
+display: none;
+position: fixed;
+bottom: 0; left: 0; right: 0;
+background: #1c1c1e;
+border-top: 1px solid rgba(255,255,255,0.1);
+padding: 12px 16px 28px;
+gap: 8px;
+z-index: 30001;
+-webkit-transform: translateY(100%); transform: translateY(100%);
+-webkit-transition: transform 0.25s; transition: transform 0.25s;
+}
+#bulk-move-row.show {
+display: -webkit-flex; display: flex;
+-webkit-transform: translateY(0); transform: translateY(0);
+}
 </style>
 
 </head>
 <body>
 
 <div class="topbar">
-  <h1>הרגלים O v19</h1>
+  <h1>הרגלים v52</h1>
   <div class="undo-redo">
     <button class="ur-btn" id="undoBtn" onclick="undo()" title="אחורה (Ctrl+Z)" disabled>↺</button>
     <button class="ur-btn" id="redoBtn" onclick="redo()" title="קדימה (Ctrl+Y)" disabled>↻</button>
+    <button class="ur-btn" id="selectBtn" onclick="toggleSelectMode()" title="בחירה">☑</button>
     <button class="ur-btn" onclick="window.location.href = window.location.href + '?t=' + Date.now()" title="רענון">⟳</button>
   </div>
 </div>
 
 <div class="legends">
   <div class="legends-row">
-    <div class="col-legend-header" id="catLegendHeader">קטגוריה</div>
     <div class="col-legend">
+      <div class="col-legend-header" id="catLegendHeader">קטגוריה</div>
       <div class="col-legend-item regular"><div class="legend-dot"></div>ברגיל</div>
       <div class="col-legend-item current"><div class="legend-dot"></div>בתהליך</div>
       <div class="col-legend-item future" ><div class="legend-dot"></div>לשפר בעתיד</div>
@@ -418,6 +570,7 @@ cursor: pointer;
 
 <div class="wrapper">
   <div id="board"></div>
+  <div id="cat-delete-bar" onclick="bulkDeleteCats()">מחק קטגוריות נבחרות</div>
   <div class="add-cat-bar">
     <input class="add-cat-inp" id="newCatInput" placeholder="+ קטגוריה חדשה..." />
     <button class="add-cat-btn" onclick="addCategory()">הוסף</button>
@@ -430,6 +583,26 @@ cursor: pointer;
 </div>
 <div id="drag-ghost"></div>
 <div id="cat-drag-ghost"></div>
+
+<!-- Bulk action bar -->
+
+<div id="bulk-bar">
+  <span id="bulk-count">0 נבחרו</span>
+  <div class="bulk-btn" onclick="bulkAction('focus')">הדגש</div>
+  <div class="bulk-btn" onclick="bulkAction('pause')">השהה</div>
+  <div class="bulk-btn" onclick="bulkAction('move')">העבר ▸</div>
+  <div class="bulk-btn bulk-danger" onclick="bulkAction('delete')">מחק</div>
+  <div class="bulk-btn" id="bulk-done" onclick="exitSelectMode()" style="background:#3a3a3c;color:#fff;display:none;">סיום</div>
+</div>
+
+<!-- Bulk move target row -->
+
+<div id="bulk-move-row">
+  <div class="bulk-btn bulk-move-sub" onclick="bulkMove(0)">● ברגיל</div>
+  <div class="bulk-btn bulk-move-sub" onclick="bulkMove(1)">● בתהליך</div>
+  <div class="bulk-btn bulk-move-sub" onclick="bulkMove(2)">● לשפר</div>
+  <div class="bulk-btn" onclick="hideMoveRow()">ביטול</div>
+</div>
 
 <script>
 document.addEventListener('contextmenu', e => e.preventDefault());
@@ -445,10 +618,17 @@ function mkItems(arr) { return arr.map(t => ({ t, f: null })); }
 const DEFAULT = [];
 
 // ── Migrate old string-based saves ──────────────────────────
+let _keyCounter = 0;
+function newKey() { return 'k' + (++_keyCounter); }
+
 function migrate(d) {
   d.forEach(cat => {
     cat.cols = cat.cols.map(col =>
-      col.map(item => typeof item === 'string' ? { t: item, f: null } : item)
+      col.map(item => {
+        if (typeof item === 'string') item = { t: item, f: null };
+        if (!item._key) item._key = newKey();
+        return item;
+      })
     );
   });
   return d;
@@ -496,8 +676,23 @@ document.addEventListener('keydown', e => {
 });
 
 // ── Persistence ──────────────────────────────────────────────
-function persist() { localStorage.setItem('hb8', JSON.stringify(data)); }
-function load()    { try { return JSON.parse(localStorage.getItem('hb8')) || null; } catch { return null; } }
+function persist() {
+  const json = JSON.stringify(data);
+  try { localStorage.setItem('hb8', json); } catch(e) { console.warn('localStorage failed', e); }
+  try { sessionStorage.setItem('hb8', json); } catch(e) {}
+}
+function load() {
+  try {
+    const ls = localStorage.getItem('hb8');
+    if (ls) { console.log('loaded from localStorage, items:', JSON.parse(ls).length); return JSON.parse(ls); }
+  } catch(e) { console.warn('localStorage load failed', e); }
+  try {
+    const ss = sessionStorage.getItem('hb8');
+    if (ss) { console.log('loaded from sessionStorage'); return JSON.parse(ss); }
+  } catch(e) {}
+  console.log('no saved data found');
+  return null;
+}
 
 let raw = load();
 let data = raw ? migrate(raw) : JSON.parse(JSON.stringify(DEFAULT));
@@ -706,22 +901,58 @@ document.addEventListener('mouseup',   () => { clearTimeout(longPressTimer); if 
 
 // ── Category edit mode ───────────────────────────────────────
 let catEditMode = false;
+let selectedCats = new Set();
+
 const catLegendHeader = document.getElementById('catLegendHeader');
 catLegendHeader.addEventListener('click', () => {
   catEditMode = !catEditMode;
+  if (!catEditMode) selectedCats.clear();
   document.body.classList.toggle('cat-edit-mode', catEditMode);
   catLegendHeader.classList.toggle('edit-active', catEditMode);
+  updateCatDeleteBar();
+  render();
 });
 
-function openCatRename(ci, labelEl) {
+function updateCatDeleteBar() {
+  const bar = document.getElementById('cat-delete-bar');
+  if (!bar) return;
+  if (selectedCats.size > 0) {
+    bar.textContent = `מחק ${selectedCats.size} קטגוריות נבחרות`;
+    bar.classList.remove('no-selection');
+  } else {
+    bar.textContent = 'מחק קטגוריות נבחרות';
+    bar.classList.add('no-selection');
+  }
+}
+
+function toggleCatSelect(ci) {
+  const key = data[ci].name + '_' + ci;
+  if (selectedCats.has(ci)) selectedCats.delete(ci);
+  else selectedCats.add(ci);
+  updateCatDeleteBar();
+  render();
+}
+
+function bulkDeleteCats() {
+  if (selectedCats.size === 0) return;
+  const sorted = Array.from(selectedCats).sort((a,b) => b - a);
+  sorted.forEach(ci => data.splice(ci, 1));
+  selectedCats.clear();
+  commit(sorted.length + ' קטגוריות נמחקו');
+  updateCatDeleteBar();
+}
+
+function openCatRename(ci, overlayEl) {
   const inp = document.createElement('input');
   inp.value = data[ci].name;
-  inp.style.cssText = `background:none;border:none;outline:none;font-family:Heebo,sans-serif;font-size:11px;font-weight:700;color:#fff;text-align:center;width:100%;-webkit-user-select:text;user-select:text;`;
-  labelEl.replaceWith(inp);
+  inp.style.cssText = `background:none;border:none;outline:none;font-family:Heebo,sans-serif;font-size:14px;font-weight:700;color:#fff;text-align:center;width:90%;-webkit-user-select:text;user-select:text;border-bottom:1.5px solid rgba(255,255,255,0.4);`;
+  overlayEl.textContent = '';
+  overlayEl.appendChild(inp);
   inp.focus(); inp.select();
   const finish = () => {
     const v = inp.value.trim();
-    if (v && v !== data[ci].name) { data[ci].name = v; commit('שם קטגוריה עודכן'); } else render();
+    if (v && v !== data[ci].name) { data[ci].name = v; commit('שם קטגוריה עודכן'); }
+    else render();
   };
   inp.addEventListener('blur', finish);
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); if (e.key === 'Escape') { inp.value = data[ci].name; inp.blur(); } });
@@ -919,7 +1150,7 @@ function render() {
 
     const tabLabel = document.createElement('span');
     tabLabel.className = 'cat-tab-label';
-    tabLabel.textContent = cat.name;
+    tabLabel.textContent = cat.name.length > 8 ? cat.name.slice(0, 8) + '…' : cat.name;
     tab.appendChild(tabLabel);
 
     // Count
@@ -927,34 +1158,47 @@ function render() {
     tabCount.className = 'cat-tab-count';
     if (focusCol !== null) {
       tabCount.textContent = (cat.cols[focusCol] || []).length;
-      tabCount.style.color = ['var(--green)', 'var(--orange)', 'var(--neutral)'][focusCol];
+    tabCount.style.color = ['#5ebd7e', '#d4955a', '#8e8e93'][focusCol];
     } else {
       tabCount.textContent = cat.cols.reduce((s, c) => s + c.length, 0);
     }
     tab.appendChild(tabCount);
 
-    // Edit mode actions (delete + pencil)
+    // Edit mode actions (delete only)
     const editActions = document.createElement('div');
     editActions.className = 'cat-edit-actions';
 
     const delBtn = document.createElement('div');
     delBtn.className = 'cat-edit-del';
-    delBtn.textContent = '×';
+    delBtn.classList.toggle('cat-selected-check', selectedCats.has(ci));
     delBtn.addEventListener('pointerdown', e => e.stopPropagation());
-    delBtn.addEventListener('click', e => { e.stopPropagation(); showCatDeleteConfirm(ci, tab); });
-
-    const pencilBtn = document.createElement('div');
-    pencilBtn.className = 'cat-edit-pencil';
-    pencilBtn.textContent = '✏️';
-    pencilBtn.addEventListener('pointerdown', e => e.stopPropagation());
-    pencilBtn.addEventListener('click', e => { e.stopPropagation(); openCatRename(ci, tabLabel); });
+    delBtn.addEventListener('click', e => { e.stopPropagation(); toggleCatSelect(ci); });
+    delBtn.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); toggleCatSelect(ci); });
 
     editActions.appendChild(delBtn);
-    editActions.appendChild(pencilBtn);
     tab.appendChild(editActions);
 
     const card = document.createElement('div');
     card.className = 'category-card';
+
+    // Overlay shown in edit mode
+    const overlay = document.createElement('div');
+    overlay.className = 'cat-edit-overlay';
+    overlay.textContent = cat.name;
+
+    // Double click to rename
+    overlay.addEventListener('dblclick', e => { e.stopPropagation(); openCatRename(ci, overlay); });
+
+    // Double tap to rename on touch
+    let lastTap = 0;
+    overlay.addEventListener('touchend', e => {
+      if (!catEditMode) return;
+      const now = Date.now();
+      if (now - lastTap < 350) { e.preventDefault(); openCatRename(ci, overlay); }
+      lastTap = now;
+    });
+
+    card.appendChild(overlay);
 
     if (cat.collapsed && focusCol === null) { wrapper.appendChild(tab); wrapper.appendChild(card); board.appendChild(wrapper); return; }
 
@@ -1005,6 +1249,11 @@ function render() {
         chip.dataset.ci = ci;
         chip.dataset.ki = ki;
         chip.dataset.ii = ii;
+
+        // Mark selected in select mode
+        if (selectMode && item._key && selected.includes(item._key)) {
+          chip.classList.add('selected');
+        }
 
         // ── Tap → flag picker / Long press → drag ──
         let isDragging = false;
@@ -1093,6 +1342,11 @@ function render() {
             else cancelDrag();
             return;
           }
+          if (selectMode) {
+            e.preventDefault();
+            toggleChipSelect(parseInt(chip.dataset.ci), parseInt(chip.dataset.ki), parseInt(chip.dataset.ii));
+            return;
+          }
           const t = e.changedTouches[0];
           const dy = Math.abs(t.clientY - pressStartY);
           if (!isDragging && dy < 8) {
@@ -1112,6 +1366,8 @@ function render() {
         const addRow = document.createElement('div');
         addRow.className = 'add-row';
         const addInp = document.createElement('input');
+        addInp.dataset.ci = ci;
+        addInp.dataset.ki = ki;
         addInp.className = 'add-inp';
         addInp.placeholder = '+';
 
@@ -1144,37 +1400,27 @@ function render() {
     card.appendChild(colsEl);
     wrapper.appendChild(tab);
     wrapper.appendChild(card);
+    if (selectedCats.has(ci)) {
+      wrapper.classList.add('cat-selected');
+      tab.style.background = 'rgba(255,59,48,0.22)';
+      card.style.background = 'rgba(255,59,48,0.15)';
+    }
+
     board.appendChild(wrapper);
   });
 
-  // Equalize all tab widths to the widest one
-  const tabs = board.querySelectorAll('.cat-tab');
-  let maxW = 0;
-  tabs.forEach(t => { t.style.width = 'auto'; maxW = Math.max(maxW, t.offsetWidth); });
-  tabs.forEach(t => { t.style.width = maxW + 'px'; });
-
-  // Sync legend header width
-  const hdr = document.getElementById('catLegendHeader');
-  if (hdr) {
-    if (maxW > 0) {
-      hdr.style.width = maxW + 'px';
-      hdr.style.visibility = 'visible';
-    } else {
-      hdr.style.visibility = 'hidden';
-      hdr.style.width = '0px';
-    }
-  }
+  // tabs are flex:1, no manual width needed
 }
 
 function submitAdd(inp, ci, ki) {
   const val = inp.value.trim();
   if (!val) return;
-  data[ci].cols[ki].push({ t: val, f: null });
+  data[ci].cols[ki].push({ t: val, f: null, _key: newKey() });
   commit('הרגל נוסף');
   inp.value = '';
   setTimeout(() => {
-    const all = document.querySelectorAll(`.category-card:nth-child(${ci+1}) .add-inp`);
-    if (all[ki]) all[ki].focus();
+    const inp2 = document.querySelector(`.add-inp[data-ci="${ci}"][data-ki="${ki}"]`);
+    if (inp2) inp2.focus();
   }, 30);
 }
 
@@ -1188,6 +1434,15 @@ function addCategory() {
 
 document.getElementById('newCatInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') addCategory();
+});
+
+document.getElementById('newCatInput').addEventListener('paste', e => {
+  e.preventDefault();
+  const txt = (e.clipboardData || window.clipboardData).getData('text');
+  const lines = txt.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  if (lines.length <= 1) { document.getElementById('newCatInput').value = txt.trim(); return; }
+  lines.forEach(name => data.push({ name, cols: [[], [], []] }));
+  commit(`${lines.length} קטגוריות נוספו`);
 });
 
 
@@ -1215,11 +1470,13 @@ function showCatDeleteConfirm(ci, tabEl) {
     if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); }
   };
   setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 50);
-  picker.querySelector('.dp-ok').addEventListener('click', () => {
+  const doDelete = () => {
     picker.remove(); document.removeEventListener('pointerdown', onOutside, true);
     data.splice(ci, 1);
     commit('קטגוריה נמחקה');
-  });
+  };
+  picker.querySelector('.dp-ok').addEventListener('click', doDelete);
+  picker.querySelector('.dp-ok').addEventListener('touchend', e => { e.preventDefault(); doDelete(); });
 }
 
 function showDeleteConfirm(habitText, onConfirm) {
@@ -1276,13 +1533,11 @@ function showRedoDeleteConfirm(onConfirm) {
   };
   setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 50);
 
-  picker.querySelector('.dp-ok').addEventListener('click', () => {
-    picker.remove(); document.removeEventListener('pointerdown', onOutside, true);
-    onConfirm();
-  });
+  const doConfirmHabit = () => { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); onConfirm(); };
+  picker.querySelector('.dp-ok').addEventListener('click', doConfirmHabit);
+  picker.querySelector('.dp-ok').addEventListener('touchend', e => { e.preventDefault(); doConfirmHabit(); });
 }
 
-// ── Focus mode ───────────────────────────────────────────────
 let focusCol = null;
 
 function setFocusCol(ki) {
@@ -1303,13 +1558,114 @@ function setFocusCol(ki) {
   render();
 }
 
+// ── Select mode ──────────────────────────────────────────────
+let selectMode = false;
+let selected = []; // [{ci, ki, ii}]
+
 document.querySelectorAll('.col-legend-item').forEach((el, i) => {
   el.addEventListener('click', () => setFocusCol(i));
 });
 
 render();
 
-// ── Reload feedback ──────────────────────────────────────────
+// ── Select mode functions ────────────────────────────────────
+
+function toggleSelectMode() {
+  if (catEditMode) return;
+  selectMode = !selectMode;
+  selected = [];
+  document.getElementById('selectBtn').classList.toggle('select-active', selectMode);
+  document.body.classList.toggle('select-mode', selectMode);
+  hideMoveRow();
+  document.getElementById('bulk-bar').classList.toggle('show', selectMode);
+  document.getElementById('bulk-done').style.display = 'none';
+  updateBulkBar();
+  render();
+}
+
+function exitSelectMode() {
+  selectMode = false;
+  selected = [];
+  document.getElementById('selectBtn').classList.remove('select-active');
+  document.body.classList.remove('select-mode');
+  hideMoveRow();
+  document.getElementById('bulk-bar').classList.remove('show');
+  render();
+}
+
+// Find current location of item by its unique key (ci + original text)
+function findItem(key) {
+  for (let ci = 0; ci < data.length; ci++) {
+    for (let ki = 0; ki < 3; ki++) {
+      for (let ii = 0; ii < data[ci].cols[ki].length; ii++) {
+        if (data[ci].cols[ki][ii]._key === key) return {ci, ki, ii};
+      }
+    }
+  }
+  return null;
+}
+
+function toggleChipSelect(ci, ki, ii) {
+  const key = data[ci].cols[ki][ii]._key;
+  const idx = selected.indexOf(key);
+  if (idx >= 0) selected.splice(idx, 1);
+  else selected.push(key);
+  updateBulkBar();
+  render();
+}
+
+function updateBulkBar() {
+  const n = selected.length;
+  document.getElementById('bulk-count').textContent = n + ' נבחרו';
+}
+
+function bulkAction(action) {
+  if (selected.length === 0) return;
+  if (action === 'move') { showMoveRow(); return; }
+
+  // Resolve current positions
+  const resolved = selected.map(k => findItem(k)).filter(Boolean);
+
+  if (action === 'delete') {
+    const sorted = resolved.sort((a,b) => b.ci-a.ci || b.ki-a.ki || b.ii-a.ii);
+    sorted.forEach(({ci,ki,ii}) => data[ci].cols[ki].splice(ii,1));
+    commit(resolved.length + ' הרגלים נמחקו');
+    exitSelectMode(); return;
+  }
+  if (action === 'focus') {
+    resolved.forEach(({ci,ki,ii}) => { data[ci].cols[ki][ii].f = 'focus'; });
+    commit('סומנו כמודגשים');
+  }
+  if (action === 'pause') {
+    resolved.forEach(({ci,ki,ii}) => { data[ci].cols[ki][ii].f = 'pause'; });
+    commit('הושהו');
+  }
+  document.getElementById('bulk-done').style.display = 'block';
+  persist(); render(); updateBulkBar();
+}
+
+function showMoveRow() {
+  document.getElementById('bulk-move-row').classList.add('show');
+}
+function hideMoveRow() {
+  document.getElementById('bulk-move-row').classList.remove('show');
+}
+
+function bulkMove(targetKi) {
+  if (selected.length === 0) return;
+  const resolved = selected.map(k => findItem(k)).filter(Boolean);
+  const sorted = resolved.sort((a,b) => b.ci-a.ci || b.ki-a.ki || b.ii-a.ii);
+  sorted.forEach(({ci,ki,ii}) => {
+    const item = data[ci].cols[ki].splice(ii,1)[0];
+    data[ci].cols[targetKi].push(item);
+  });
+  commit('הרגלים הועברו');
+  hideMoveRow();
+  document.getElementById('bulk-done').style.display = 'block';
+  persist(); render(); updateBulkBar();
+}
+
+
 try {
   if (window.location.search.includes('t=')) {
     const toast = document.createElement('div');
