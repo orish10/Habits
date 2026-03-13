@@ -398,7 +398,7 @@ cursor: pointer;
 <body>
 
 <div class="topbar">
-  <h1>הרגלים O v8</h1>
+  <h1>הרגלים O v11</h1>
   <div class="undo-redo">
     <button class="ur-btn" id="undoBtn" onclick="undo()" title="אחורה (Ctrl+Z)" disabled>↺</button>
     <button class="ur-btn" id="redoBtn" onclick="redo()" title="קדימה (Ctrl+Y)" disabled>↻</button>
@@ -1277,7 +1277,8 @@ function setFocusCol(ki) {
     items.forEach(el => el.classList.remove('active-focus', 'dimmed'));
   } else {
     focusCol = ki;
-    document.body.className = `focus-mode focus-${ki}`;
+    document.body.classList.remove('focus-0', 'focus-1', 'focus-2');
+    document.body.classList.add('focus-mode', `focus-${ki}`);
     items.forEach((el, i) => {
       el.classList.toggle('active-focus', i === ki);
       el.classList.toggle('dimmed', i !== ki);
@@ -1291,6 +1292,22 @@ document.querySelectorAll('.col-legend-item').forEach((el, i) => {
 });
 
 render();
+
+// ── Reload feedback ──────────────────────────────────────────
+try {
+  if (window.location.search.includes('t=')) {
+    const btn = document.querySelector('.ur-btn[title="רענון"]');
+    if (btn) {
+      btn.textContent = '✓';
+      btn.style.color = '#5ebd7e';
+      setTimeout(() => {
+        btn.textContent = '⟳';
+        btn.style.color = '';
+        try { window.history.replaceState(null, '', window.location.pathname); } catch(e) {}
+      }, 2000);
+    }
+  }
+} catch(e) {}
 </script>
 
 </body>
