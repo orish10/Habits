@@ -1,343 +1,550 @@
 <!DOCTYPE html>
-
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>לוח הרגלים</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after {
-  margin: 0; padding: 0;
-  -webkit-box-sizing: border-box; box-sizing: border-box;
-  -webkit-user-select: none; user-select: none;
-  -webkit-touch-callout: none;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-text-size-adjust: 100%;
-  font: inherit;
+:root {
+  --bg: #0e0e10;
+  --card: #1c1c1e;
+  --card-2: #2c2c2e;
+  --text: #ffffff;
+  --muted: #8e8e93;
+  --muted-2: #636366;
+  --green: #5ebd7e;
+  --green-bg: #1a3d28;
+  --orange: #d4955a;
+  --orange-bg: #3d2a0e;
+  --neutral: #8e8e93;
+  --neutral-bg: #222224;
+  --danger: #ff3b30;
 }
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-text-size-adjust: 100%;
+}
+
 html {
-  background: #0e0e10;
+  background: var(--bg);
   min-height: 100%;
   -webkit-text-size-adjust: 100%;
 }
+
 body {
   font-family: 'Heebo', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #0e0e10;
-  color: #ffffff;
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
-  padding: 20px 14px 120px;
+  min-height: 100dvh;
+  padding: 20px 14px calc(120px + env(safe-area-inset-bottom));
   overflow-x: hidden;
 }
-button { background: none; border: none; cursor: pointer; padding: 0; }
-input  { background: none; border: none; outline: none; padding: 0; }
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+input,
+textarea {
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0;
+}
 
 /* ── Topbar ── */
 .topbar {
-max-width: 680px;
-margin: 0 auto 18px;
-display: -webkit-flex; display: flex;
--webkit-align-items: center; align-items: center;
--webkit-justify-content: space-between; justify-content: space-between;
+  max-width: 680px;
+  margin: 0 auto 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #ffffff; }
-.undo-redo { display: -webkit-flex; display: flex; gap: 8px; }
+
+h1 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+
+.undo-redo {
+  display: flex;
+  gap: 8px;
+}
+
 .ur-btn {
-background: #1c1c1e;
-border-radius: 50%;
-color: #8e8e93;
-font-size: 17px;
-width: 36px; height: 36px;
-display: -webkit-flex; display: flex;
--webkit-align-items: center; align-items: center;
--webkit-justify-content: center; justify-content: center;
--webkit-transition: background .15s, color .15s; transition: background .15s, color .15s;
+  background: var(--card);
+  border-radius: 50%;
+  color: var(--muted);
+  font-size: 17px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, color .15s, opacity .15s;
 }
-.ur-btn:disabled { opacity: 0.25; }
+
+.ur-btn:disabled {
+  opacity: 0.25;
+}
 
 /* ── Legend row ── */
 .legends {
-max-width: 680px;
-margin: 0 auto 18px;
-display: -webkit-flex; display: flex;
--webkit-flex-direction: column; flex-direction: column;
-gap: 8px;
+  max-width: 680px;
+  margin: 0 auto 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
+
 .legends-row {
-display: -webkit-flex; display: flex;
--webkit-flex-direction: row; flex-direction: row;
--webkit-align-items: stretch; align-items: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
 }
+
 .col-legend {
-display: -webkit-flex; display: flex;
--webkit-flex: 1; flex: 1;
-gap: 8px;
+  display: flex;
+  flex: 1;
+  gap: 8px;
 }
+
 .col-legend-item {
--webkit-flex: 1; flex: 1;
-display: -webkit-flex; display: flex;
--webkit-align-items: center; align-items: center;
--webkit-justify-content: center; justify-content: center;
-gap: 6px;
-padding: 7px 10px;
-border-radius: 100px;
-font-size: 12px; font-weight: 700;
-cursor: pointer;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
 }
-.col-legend-item.regular { background: #1a3d28; color: #5ebd7e; }
-.col-legend-item.current { background: #3d2a0e; color: #d4955a; }
-.col-legend-item.future  { background: #222224; color: #8e8e93; }
-.col-legend-item.active-focus { outline: 2px solid currentColor; }
-.col-legend-item.dimmed { opacity: 0.3; }
-.legend-dot { width: 7px; height: 7px; border-radius: 50%; -webkit-flex-shrink: 0; flex-shrink: 0; }
-.regular .legend-dot { background: #5ebd7e; }
-.current .legend-dot { background: #d4955a; }
-.future  .legend-dot { background: #8e8e93; }
+
+.col-legend-item.regular { background: var(--green-bg); color: var(--green); }
+.col-legend-item.current { background: var(--orange-bg); color: var(--orange); }
+.col-legend-item.future  { background: var(--neutral-bg); color: var(--neutral); }
+
+.col-legend-item.active-focus {
+  outline: 2px solid currentColor;
+  outline-offset: 0;
+}
+
+.col-legend-item.dimmed {
+  opacity: 0.3;
+}
+
+.legend-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.regular .legend-dot { background: var(--green); }
+.current .legend-dot { background: var(--orange); }
+.future  .legend-dot { background: var(--neutral); }
 
 .col-legend-header {
-display: -webkit-flex; display: flex;
--webkit-align-items: center; align-items: center;
--webkit-justify-content: center; justify-content: center;
-font-size: 11px; font-weight: 700;
-color: #636366;
--webkit-flex-shrink: 0; flex-shrink: 0;
-cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted-2);
+  flex-shrink: 0;
+  cursor: pointer;
 }
-.col-legend-header.edit-active { color: #ffffff; }
+
+.col-legend-header.edit-active {
+  color: var(--text);
+}
 
 /* ── Wrapper ── */
-.wrapper { max-width: 680px; margin: 0 auto; }
+.wrapper {
+  max-width: 680px;
+  margin: 0 auto;
+}
 
 /* ── Category wrapper ── */
 .cat-wrapper {
-display: -webkit-flex; display: flex;
--webkit-flex-direction: row; flex-direction: row;
--webkit-align-items: stretch; align-items: stretch;
-margin-bottom: 6px;
-border-radius: 18px;
-overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  margin-bottom: 6px;
+  border-radius: 18px;
+  overflow: hidden;
+  transform: translateZ(0);
 }
+
 .cat-tab {
-display: -webkit-flex; display: flex;
--webkit-flex-direction: column; flex-direction: column;
--webkit-align-items: center; align-items: center;
--webkit-justify-content: center; justify-content: center;
-background: #2c2c2e;
-min-width: 44px;
--webkit-flex-shrink: 0; flex-shrink: 0;
-cursor: pointer;
-padding: 10px 8px;
-gap: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--card-2);
+  min-width: 44px;
+  flex-shrink: 0;
+  cursor: pointer;
+  padding: 10px 8px;
+  gap: 4px;
+  touch-action: pan-x pan-y;
 }
+
 .cat-tab-label {
-display: block;
-font-size: 11px; font-weight: 700;
-color: #aeaeb2;
-text-align: center;
-line-height: 1.3;
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #aeaeb2;
+  text-align: center;
+  line-height: 1.3;
 }
+
 .cat-tab-count {
-font-size: 12px; font-weight: 700;
-color: #636366;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted-2);
 }
+
 .cat-edit-actions {
-display: none;
--webkit-align-items: center; align-items: center;
--webkit-justify-content: center; justify-content: center;
-gap: 6px;
-padding: 4px 6px 6px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 6px 6px;
 }
-body.cat-edit-mode .cat-edit-actions { display: -webkit-flex; display: flex; }
-body.cat-edit-mode .cat-tab-count { display: none; }
-.cat-edit-del {
-font-size: 18px; color: #ff3b30;
-width: 28px; height: 28px;
-display: -webkit-flex; display: flex;
--webkit-align-items: center; align-items: center;
--webkit-justify-content: center; justify-content: center;
-border-radius: 50%;
-background: rgba(255,59,48,0.2);
-cursor: pointer;
+
+body.cat-edit-mode .cat-edit-actions {
+  display: flex;
 }
+
+body.cat-edit-mode .cat-tab-count {
+  display: none;
+}
+
+.cat-edit-del,
 .cat-edit-pencil {
-font-size: 14px; color: #aeaeb2;
-width: 28px; height: 28px;
-display: -webkit-flex; display: flex;
--webkit-align-items: center; align-items: center;
--webkit-justify-content: center; justify-content: center;
-border-radius: 50%;
-background: #1c1c1e;
-cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.cat-edit-del {
+  font-size: 18px;
+  color: var(--danger);
+  background: rgba(255,59,48,0.2);
+}
+
+.cat-edit-pencil {
+  font-size: 14px;
+  color: #aeaeb2;
+  background: var(--card);
 }
 
 /* ── Category card ── */
 .category-card {
-background: #1c1c1e;
--webkit-flex: 1; flex: 1;
-min-width: 0;
-overflow: hidden;
+  background: var(--card);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 /* ── 3-col grid ── */
 .cat-cols {
-display: -webkit-flex; display: flex;
-width: 100%;
+  display: flex;
+  width: 100%;
 }
+
 .col {
--webkit-flex: 1; flex: 1;
-padding: 8px 7px 5px;
-border-left: 1px solid rgba(255,255,255,0.07);
-min-height: 40px;
-position: relative;
-min-width: 0;
-overflow: hidden;
+  flex: 1;
+  padding: 8px 7px 5px;
+  border-left: 1px solid rgba(255,255,255,0.07);
+  min-height: 40px;
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
 }
-.col:last-child { border-left: none; }
-.col.drag-over { background: rgba(255,255,255,0.04); }
+
+.col:last-child {
+  border-left: none;
+}
+
+.col.drag-over {
+  background: rgba(255,255,255,0.04);
+}
 
 /* ── Chip ── */
 .chip {
-display: block;
-padding: 6px 8px;
-border-radius: 11px;
-font-size: 11.5px; font-weight: 500; line-height: 1.35;
-margin-bottom: 5px;
-word-break: break-word;
-cursor: default;
-position: relative;
-text-align: center;
-width: 100%;
--webkit-box-sizing: border-box; box-sizing: border-box;
+  display: block;
+  padding: 6px 8px;
+  border-radius: 11px;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.35;
+  margin-bottom: 5px;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  cursor: default;
+  position: relative;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
-.col.regular .chip { background: #1a3d28; color: #5ebd7e; }
-.col.current .chip { background: #3d2a0e; color: #d4955a; }
-.col.future  .chip { background: #222224; color: #8e8e93; }
 
-.chip[data-flag=“focus”] {
--webkit-box-shadow: 0 0 0 2.5px rgba(255,255,255,0.55);
-box-shadow: 0 0 0 2.5px rgba(255,255,255,0.55);
+.col.regular .chip { background: var(--green-bg); color: var(--green); }
+.col.current .chip { background: var(--orange-bg); color: var(--orange); }
+.col.future  .chip { background: var(--neutral-bg); color: var(--neutral); }
+
+.chip[data-flag="focus"] {
+  box-shadow: 0 0 0 2.5px rgba(255,255,255,0.55);
 }
-.chip[data-flag=“pause”] {
-background: transparent !important;
-color: #6e6e73 !important;
-border: 1.5px dashed #48484a;
+
+.chip[data-flag="pause"] {
+  background: transparent !important;
+  color: #6e6e73 !important;
+  border: 1.5px dashed #48484a;
 }
-.chip[data-flag=“focus-pause”], .chip[data-flag=“pause-focus”] {
--webkit-box-shadow: 0 0 0 2.5px rgba(255,255,255,0.55);
-box-shadow: 0 0 0 2.5px rgba(255,255,255,0.55);
-background: transparent !important;
-color: #6e6e73 !important;
-border: 1.5px dashed #48484a;
+
+.chip[data-flag="focus-pause"],
+.chip[data-flag="pause-focus"] {
+  box-shadow: 0 0 0 2.5px rgba(255,255,255,0.55);
+  background: transparent !important;
+  color: #6e6e73 !important;
+  border: 1.5px dashed #48484a;
 }
-.chip[data-flag=“urgent”] {
-background: rgba(255,59,48,0.15) !important;
-color: #ff3b30 !important;
+
+.chip[data-flag="urgent"] {
+  background: rgba(255,59,48,0.15) !important;
+  color: var(--danger) !important;
 }
-.chip.dragging { opacity: 0.2; -webkit-transform: scale(0.94); transform: scale(0.94); }
-.chip-text { display: block; text-align: center; }
+
+.chip.dragging {
+  opacity: 0.2;
+  transform: scale(0.94);
+}
+
+.chip-text {
+  display: block;
+  text-align: center;
+}
 
 /* ── Flag picker ── */
 .flag-picker {
-position: fixed;
-background: #2c2c2e;
-border-radius: 14px;
-padding: 6px;
-display: -webkit-flex; display: flex;
-gap: 4px;
-z-index: 10000;
--webkit-box-shadow: 0 8px 32px rgba(0,0,0,0.7);
-box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+  position: fixed;
+  background: var(--card-2);
+  border-radius: 14px;
+  padding: 6px;
+  display: flex;
+  gap: 4px;
+  z-index: 10000;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+  -webkit-backdrop-filter: blur(0);
+  backdrop-filter: blur(0);
 }
-.fp-btn {
-background: #1c1c1e;
-border-radius: 10px;
-padding: 10px;
-cursor: pointer;
-display: -webkit-flex; display: flex;
--webkit-align-items: center; align-items: center;
--webkit-justify-content: center; justify-content: center;
-min-width: 44px; min-height: 44px;
-}
-.fp-btn.active { background: #3a3a3c; outline: 1.5px solid rgba(255,255,255,0.15); }
-.fp-btn.fp-danger .fp-icon { color: #ff3b30; }
-.fp-icon { font-size: 20px; color: #ffffff; }
-.fp-focus .fp-icon { font-size: 26px; }
-.fp-label { display: none; }
 
-.delete-confirm-picker { padding: 5px; }
-.delete-confirm-picker .fp-btn { min-width: 80px; -webkit-justify-content: center; justify-content: center; }
-.dp-delete-label { font-size: 15px; font-weight: 600; color: #ff3b30; font-family: ‘Heebo’, sans-serif; }
+.fp-btn {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.fp-btn.active {
+  background: #3a3a3c;
+  outline: 1.5px solid rgba(255,255,255,0.15);
+}
+
+.fp-btn.fp-danger .fp-icon {
+  color: var(--danger);
+}
+
+.fp-icon {
+  font-size: 20px;
+  color: var(--text);
+}
+
+.fp-focus .fp-icon {
+  font-size: 26px;
+}
+
+.fp-label {
+  display: none;
+}
+
+.delete-confirm-picker {
+  padding: 5px;
+}
+
+.delete-confirm-picker .fp-btn {
+  min-width: 80px;
+  justify-content: center;
+}
+
+.dp-delete-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--danger);
+  font-family: 'Heebo', sans-serif;
+}
 
 /* ── Drag ghost ── */
 #drag-ghost {
-position: fixed; pointer-events: none;
-background: #2c2c2e; border-radius: 10px;
-padding: 7px 14px;
-font-family: ‘Heebo’, sans-serif; font-size: 13px; font-weight: 600; color: #fff;
-z-index: 9999; max-width: 200px; text-align: center;
--webkit-box-shadow: 0 8px 30px rgba(0,0,0,0.7); box-shadow: 0 8px 30px rgba(0,0,0,0.7);
-display: none;
+  position: fixed;
+  pointer-events: none;
+  background: var(--card-2);
+  border-radius: 10px;
+  padding: 7px 14px;
+  font-family: 'Heebo', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  z-index: 9999;
+  max-width: 200px;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+  display: none;
 }
-#cat-drag-ghost { display: none; }
+
+#cat-drag-ghost {
+  display: none;
+}
 
 /* ── Edit mode ── */
-.chip.editing { background: #2c2c2e !important; color: #fff !important; }
+.chip.editing {
+  background: var(--card-2) !important;
+  color: #fff !important;
+}
+
 .chip-input {
-background: none;
-font-family: ‘Heebo’, sans-serif; font-size: 12px; font-weight: 500;
-color: #fff; text-align: center;
-width: 100%; resize: none; overflow: hidden;
--webkit-user-select: text; user-select: text;
-display: block;
+  background: none;
+  font-family: 'Heebo', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  text-align: center;
+  width: 100%;
+  resize: none;
+  overflow: hidden;
+  -webkit-user-select: text;
+  user-select: text;
+  display: block;
 }
 
 /* ── Add row ── */
 .add-row {
-display: -webkit-flex; display: flex;
--webkit-align-items: center; align-items: center;
-gap: 4px;
-margin-top: 2px; padding: 2px;
-border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  padding: 2px;
+  border-radius: 8px;
 }
-.add-row:focus-within { background: #2c2c2e; }
+
+.add-row:focus-within {
+  background: var(--card-2);
+}
+
 .add-inp {
--webkit-flex: 1; flex: 1;
-font-family: ‘Heebo’, sans-serif; font-size: 12px; color: #fff;
-padding: 4px 6px; min-width: 0;
--webkit-user-select: text; user-select: text;
+  flex: 1;
+  font-family: 'Heebo', sans-serif;
+  font-size: 12px;
+  color: #fff;
+  padding: 4px 6px;
+  min-width: 0;
+  -webkit-user-select: text;
+  user-select: text;
 }
-.add-inp::-webkit-input-placeholder { color: #3a3a3c; }
-.add-inp::placeholder { color: #3a3a3c; }
+
+.add-inp::placeholder {
+  color: #3a3a3c;
+}
+
 .add-done-btn {
-display: none;
-background: #2c2c2e;
-border-radius: 7px;
-color: #8e8e93;
-font-family: ‘Heebo’, sans-serif;
-font-size: 11px; font-weight: 600; padding: 3px 8px;
-cursor: pointer; white-space: nowrap; -webkit-flex-shrink: 0; flex-shrink: 0;
+  display: none;
+  background: var(--card-2);
+  border-radius: 7px;
+  color: var(--muted);
+  font-family: 'Heebo', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
-.add-row:focus-within .add-done-btn { display: block; }
+
+.add-row:focus-within .add-done-btn {
+  display: block;
+}
 
 /* ── Add category ── */
-.add-cat-bar { display: -webkit-flex; display: flex; gap: 8px; margin-top: 6px; }
-.add-cat-inp {
--webkit-flex: 1; flex: 1;
-background: #1c1c1e;
-border-radius: 14px;
-padding: 11px 16px; color: #fff;
-font-family: ‘Heebo’, sans-serif; font-size: 14px;
--webkit-user-select: text; user-select: text;
+.add-cat-bar {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
 }
-.add-cat-inp::-webkit-input-placeholder { color: #3a3a3c; }
-.add-cat-inp::placeholder { color: #3a3a3c; }
+
+.add-cat-inp {
+  flex: 1;
+  background: var(--card);
+  border-radius: 14px;
+  padding: 11px 16px;
+  color: #fff;
+  font-family: 'Heebo', sans-serif;
+  font-size: 14px;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.add-cat-inp::placeholder {
+  color: #3a3a3c;
+}
+
 .add-cat-btn {
-background: #2c2c2e;
-border-radius: 14px;
-color: #8e8e93;
-font-family: ‘Heebo’, sans-serif;
-font-size: 14px; font-weight: 600; padding: 11px 18px;
-cursor: pointer;
+  background: var(--card-2);
+  border-radius: 14px;
+  color: var(--muted);
+  font-family: 'Heebo', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 18px;
+  cursor: pointer;
 }
 
 /* ── Focus mode ── */
@@ -348,52 +555,53 @@ body.focus-1 .col.regular, body.focus-1 .col.future  { opacity: 0.25; pointer-ev
 body.focus-2 .col.regular, body.focus-2 .col.current { opacity: 0.25; pointer-events: none; }
 
 @media (max-width: 480px) {
-.chip { font-size: 11px; padding: 5px 7px; }
-.col  { padding: 8px 7px 5px; }
+  .chip { font-size: 11px; padding: 5px 7px; }
+  .col  { padding: 8px 7px 5px; }
 }
 
 /* ── Undo toast ── */
 #undo-toast {
-position: fixed;
-bottom: 28px; left: 50%;
--webkit-transform: translateX(-50%) translateY(80px);
-transform: translateX(-50%) translateY(80px);
-background: #2c2c2e;
-border: 1px solid rgba(255,255,255,0.1);
-border-radius: 16px;
-padding: 10px 8px 10px 16px;
-display: -webkit-flex; display: flex;
--webkit-align-items: center; align-items: center;
-gap: 10px;
-font-family: ‘Heebo’, sans-serif;
-font-size: 13px; font-weight: 500;
-color: #e0e0e0;
-white-space: nowrap;
--webkit-box-shadow: 0 8px 32px rgba(0,0,0,0.6); box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-z-index: 20000;
--webkit-transition: -webkit-transform 0.28s, opacity 0.28s;
-transition: transform 0.28s, opacity 0.28s;
-opacity: 0;
-pointer-events: none;
+  position: fixed;
+  bottom: calc(28px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--card-2);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 10px 8px 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Heebo', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #e0e0e0;
+  white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  z-index: 20000;
+  transition: transform 0.28s, opacity 0.28s;
+  opacity: 0;
+  pointer-events: none;
 }
+
 #undo-toast.show {
--webkit-transform: translateX(-50%) translateY(0);
-transform: translateX(-50%) translateY(0);
-opacity: 1;
-pointer-events: all;
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: all;
 }
+
 #undo-toast .toast-undo-btn {
-background: rgba(255,255,255,0.1);
-border-radius: 10px;
-color: #fff;
-font-family: ‘Heebo’, sans-serif;
-font-size: 13px; font-weight: 700;
-padding: 5px 12px;
-cursor: pointer;
--webkit-flex-shrink: 0; flex-shrink: 0;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: #fff;
+  font-family: 'Heebo', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 12px;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 </style>
-
 </head>
 <body>
 
@@ -411,7 +619,7 @@ cursor: pointer;
     <div class="col-legend">
       <div class="col-legend-item regular"><div class="legend-dot"></div>ברגיל</div>
       <div class="col-legend-item current"><div class="legend-dot"></div>בתהליך</div>
-      <div class="col-legend-item future" ><div class="legend-dot"></div>לשפר בעתיד</div>
+      <div class="col-legend-item future"><div class="legend-dot"></div>לשפר בעתיד</div>
     </div>
   </div>
 </div>
@@ -434,17 +642,15 @@ cursor: pointer;
 <script>
 document.addEventListener('contextmenu', e => e.preventDefault());
 
-// ── Flag cycle: null → focus → urgent → pause → null ────────
 const FLAG_CYCLE = [null, 'focus', 'urgent', 'pause'];
-const FLAG_ICON  = {};
+const FLAG_ICON = {};
 
-// ── Default data ─────────────────────────────────────────────
-// Each item: { t: "text", f: null|"urgent"|"focus"|"pause" }
-function mkItems(arr) { return arr.map(t => ({ t, f: null })); }
+function mkItems(arr) {
+  return arr.map(t => ({ t, f: null }));
+}
 
 const DEFAULT = [];
 
-// ── Migrate old string-based saves ──────────────────────────
 function migrate(d) {
   d.forEach(cat => {
     cat.cols = cat.cols.map(col =>
@@ -454,7 +660,6 @@ function migrate(d) {
   return d;
 }
 
-// ── History ──────────────────────────────────────────────────
 const MAX_HIST = 80;
 let history = [], histIdx = -1;
 
@@ -465,44 +670,73 @@ function snapshot() {
   histIdx = history.length - 1;
   updateUR();
 }
+
 function undo() {
   if (histIdx <= 0) return;
   histIdx--;
   data = JSON.parse(JSON.stringify(history[histIdx]));
-  persist(); render(); updateUR();
+  persist();
+  render();
+  updateUR();
 }
+
 function redo() {
   if (histIdx >= history.length - 1) return;
-  // check if the state we're redoing INTO is a delete relative to current
   const next = history[histIdx + 1];
   const curr = history[histIdx];
   const nextCount = next.reduce((s, c) => s + c.cols.reduce((a, col) => a + col.length, 0), 0);
   const currCount = curr.reduce((s, c) => s + c.cols.reduce((a, col) => a + col.length, 0), 0);
+
   if (nextCount < currCount) {
-    showRedoDeleteConfirm(() => { histIdx++; data = JSON.parse(JSON.stringify(history[histIdx])); persist(); render(); updateUR(); });
+    showRedoDeleteConfirm(() => {
+      histIdx++;
+      data = JSON.parse(JSON.stringify(history[histIdx]));
+      persist();
+      render();
+      updateUR();
+    });
   } else {
     histIdx++;
     data = JSON.parse(JSON.stringify(history[histIdx]));
-    persist(); render(); updateUR();
+    persist();
+    render();
+    updateUR();
   }
 }
+
 function updateUR() {
   document.getElementById('undoBtn').disabled = histIdx <= 0;
   document.getElementById('redoBtn').disabled = histIdx >= history.length - 1;
 }
+
 document.addEventListener('keydown', e => {
-  if ((e.ctrlKey||e.metaKey) && e.key==='z' && !e.shiftKey) { e.preventDefault(); undo(); }
-  if ((e.ctrlKey||e.metaKey) && (e.key==='y'||(e.key==='z'&&e.shiftKey))) { e.preventDefault(); redo(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+    e.preventDefault();
+    undo();
+  }
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+    e.preventDefault();
+    redo();
+  }
 });
 
-// ── Persistence ──────────────────────────────────────────────
-function persist() { localStorage.setItem('hb8', JSON.stringify(data)); }
-function load()    { try { return JSON.parse(localStorage.getItem('hb8')) || null; } catch { return null; } }
+function persist() {
+  localStorage.setItem('hb8', JSON.stringify(data));
+}
+
+function load() {
+  try {
+    return JSON.parse(localStorage.getItem('hb8')) || null;
+  } catch {
+    return null;
+  }
+}
 
 let raw = load();
 let data = raw ? migrate(raw) : JSON.parse(JSON.stringify(DEFAULT));
 history = [JSON.parse(JSON.stringify(data))];
-histIdx = 0; updateUR();
+histIdx = 0;
+updateUR();
 
 function compact(d) {
   d.forEach(cat => {
@@ -512,10 +746,10 @@ function compact(d) {
 
 function toggleCollapse(ci) {
   data[ci].collapsed = !data[ci].collapsed;
-  persist(); render();
+  persist();
+  render();
 }
 
-// ── Toast ─────────────────────────────────────────────────────
 let toastTimer = null;
 
 function showToast(msg) {
@@ -533,11 +767,13 @@ function toastUndo() {
 }
 
 function commit(msg) {
-  compact(data); persist(); snapshot(); render();
+  compact(data);
+  persist();
+  snapshot();
+  render();
   showToast(msg || 'בוצע');
 }
 
-// ── Flag picker ──────────────────────────────────────────────
 let activePicker = null;
 
 function openFlagPicker(chip, ci, ki, ii, currentFlag, habitText) {
@@ -548,19 +784,19 @@ function openFlagPicker(chip, ci, ki, ii, currentFlag, habitText) {
   picker.id = 'flagPicker';
 
   const isFocused = currentFlag === 'focus' || currentFlag === 'focus-pause';
-  const isPaused  = currentFlag === 'pause'  || currentFlag === 'focus-pause';
+  const isPaused = currentFlag === 'pause' || currentFlag === 'focus-pause';
 
   const options = [
     isFocused
-      ? { flag: 'unfocus', icon: '✕',  label: 'הסר הדגשה', skip: false }
-      : { flag: 'focus',   icon: '*',  label: 'מודגש', cls: 'fp-focus', skip: false },
+      ? { flag: 'unfocus', icon: '✕', label: 'הסר הדגשה' }
+      : { flag: 'focus', icon: '*', label: 'מודגש', cls: 'fp-focus' },
     isPaused
-      ? { flag: 'unpause', icon: '▶',  label: 'המשך',       skip: false }
-      : { flag: 'pause',   icon: '⏸', label: 'מושהה',      skip: false },
-    { flag: 'delete', icon: '⊗', label: 'מחק', skip: false, danger: true },
+      ? { flag: 'unpause', icon: '▶', label: 'המשך' }
+      : { flag: 'pause', icon: '⏸', label: 'מושהה' },
+    { flag: 'delete', icon: '⊗', label: 'מחק', danger: true },
   ];
 
-  options.filter(opt => !opt.skip).forEach(opt => {
+  options.forEach(opt => {
     const btn = document.createElement('button');
     btn.className = 'fp-btn' + (opt.danger ? ' fp-danger' : '') + (opt.cls ? ' ' + opt.cls : '');
     btn.innerHTML = `<span class="fp-icon">${opt.icon}</span><span class="fp-label">${opt.label}</span>`;
@@ -576,19 +812,15 @@ function openFlagPicker(chip, ci, ki, ii, currentFlag, habitText) {
           });
         }, 50);
       } else if (opt.flag === 'pause') {
-        // add pause, keep focus if present
         data[ci].cols[ki][ii].f = isFocused ? 'focus-pause' : 'pause';
         commit('הרגל הושהה');
       } else if (opt.flag === 'unpause') {
-        // remove pause, keep focus if present
         data[ci].cols[ki][ii].f = isFocused ? 'focus' : null;
         commit('הרגל חודש');
       } else if (opt.flag === 'focus') {
-        // add focus, keep pause if present
         data[ci].cols[ki][ii].f = isPaused ? 'focus-pause' : 'focus';
         commit('סומן כמודגש');
       } else if (opt.flag === 'unfocus') {
-        // remove focus, keep pause if present
         data[ci].cols[ki][ii].f = isPaused ? 'pause' : null;
         commit('הדגשה הוסרה');
       } else {
@@ -608,14 +840,13 @@ function openFlagPicker(chip, ci, ki, ii, currentFlag, habitText) {
   const pw = picker.offsetWidth;
   const ph = picker.offsetHeight;
 
-  // position:fixed uses viewport coords — no scrollY needed
   let left = rect.left + rect.width / 2 - pw / 2;
-  let top  = rect.bottom + 4;
+  let top = rect.bottom + 4;
 
   left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
   if (rect.bottom + 4 + ph > window.innerHeight) top = rect.top - ph - 4;
 
-  picker.style.top  = top + 'px';
+  picker.style.top = top + 'px';
   picker.style.left = left + 'px';
   _confirmPickerPos = { top, chipCx: rect.left + rect.width / 2 };
 }
@@ -624,39 +855,54 @@ function openChipEdit(chip, ci, ki, ii) {
   const text = data[ci].cols[ki][ii].t;
   chip.classList.add('editing');
   chip.innerHTML = '';
+
   const inp = document.createElement('textarea');
   inp.className = 'chip-input';
   inp.value = text;
   inp.rows = 1;
   chip.appendChild(inp);
-  // Allow text selection inside input
-  inp.style.webkitUserSelect = 'text';
-  inp.style.userSelect = 'text';
-  inp.focus(); inp.select();
+
+  inp.focus();
+  inp.select();
+
   const finish = () => {
     const val = inp.value.trim();
-    if (!val) { data[ci].cols[ki].splice(ii, 1); commit('הרגל נמחק'); }
-    else      { data[ci].cols[ki][ii].t = val;   commit('הרגל עודכן'); }
+    if (!val) {
+      data[ci].cols[ki].splice(ii, 1);
+      commit('הרגל נמחק');
+    } else {
+      data[ci].cols[ki][ii].t = val;
+      commit('הרגל עודכן');
+    }
   };
+
   inp.addEventListener('blur', finish);
   inp.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); inp.blur(); }
-    if (e.key === 'Escape') { inp.value = text; inp.blur(); }
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      inp.blur();
+    }
+    if (e.key === 'Escape') {
+      inp.value = text;
+      inp.blur();
+    }
   });
 }
 
 function closeFlagPicker() {
-  if (activePicker) { activePicker.remove(); activePicker = null; }
+  if (activePicker) {
+    activePicker.remove();
+    activePicker = null;
+  }
 }
 
 document.addEventListener('pointerdown', e => {
   if (activePicker && !activePicker.contains(e.target)) closeFlagPicker();
 });
 
-// ── Drag ─────────────────────────────────────────────────────
 let drag = null, longPressTimer = null;
 const LONG_MS = 480;
-const ghost   = document.getElementById('drag-ghost');
+const ghost = document.getElementById('drag-ghost');
 
 function startDrag(ci, ki, ii, el, text, x, y) {
   closeFlagPicker();
@@ -666,26 +912,29 @@ function startDrag(ci, ki, ii, el, text, x, y) {
   ghost.style.display = 'block';
   moveGhost(x, y);
 }
+
 function moveGhost(x, y) {
   ghost.style.left = (x - ghost.offsetWidth / 2) + 'px';
-  ghost.style.top  = (y - 50) + 'px';
+  ghost.style.top = (y - 50) + 'px';
 }
+
 function endDrag(tci, tki) {
   if (!drag) return;
   const { ci, ki, ii, el } = drag;
   el.classList.remove('dragging');
   ghost.style.display = 'none';
   clearDragOver();
-  // Only allow drag within the same category
+
   if (tci !== null && tci === ci && tki !== ki) {
     const item = data[ci].cols[ki].splice(ii, 1)[0];
-    // Clear pause flag when moved out of future col
     if (item.f === 'pause') item.f = null;
     data[ci].cols[tki].push(item);
     commit('הרגל הועבר');
   }
+
   drag = null;
 }
+
 function cancelDrag() {
   if (!drag) return;
   drag.el.classList.remove('dragging');
@@ -693,16 +942,28 @@ function cancelDrag() {
   drag = null;
   clearDragOver();
 }
+
 function clearDragOver() {
   document.querySelectorAll('.col.drag-over').forEach(c => c.classList.remove('drag-over'));
 }
 
-document.addEventListener('mousemove', e => { if (drag) { moveGhost(e.clientX, e.clientY); clearDragOver(); const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('.col'); if (over && parseInt(over.dataset.ci) === drag.ci) over.classList.add('drag-over'); } });
-document.addEventListener('mouseup',   () => { clearTimeout(longPressTimer); if (drag) cancelDrag(); });
+document.addEventListener('mousemove', e => {
+  if (drag) {
+    moveGhost(e.clientX, e.clientY);
+    clearDragOver();
+    const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('.col');
+    if (over && parseInt(over.dataset.ci, 10) === drag.ci) over.classList.add('drag-over');
+  }
+});
 
-// ── Category edit mode ───────────────────────────────────────
+document.addEventListener('mouseup', () => {
+  clearTimeout(longPressTimer);
+  if (drag) cancelDrag();
+});
+
 let catEditMode = false;
 const catLegendHeader = document.getElementById('catLegendHeader');
+
 catLegendHeader.addEventListener('click', () => {
   catEditMode = !catEditMode;
   document.body.classList.toggle('cat-edit-mode', catEditMode);
@@ -712,28 +973,45 @@ catLegendHeader.addEventListener('click', () => {
 function openCatRename(ci, labelEl) {
   const inp = document.createElement('input');
   inp.value = data[ci].name;
-  inp.style.cssText = `background:none;border:none;outline:none;font-family:Heebo,sans-serif;font-size:11px;font-weight:700;color:#fff;text-align:center;width:100%;-webkit-user-select:text;user-select:text;`;
+  inp.style.cssText = 'background:none;border:none;outline:none;font-family:Heebo,sans-serif;font-size:11px;font-weight:700;color:#fff;text-align:center;width:100%;-webkit-user-select:text;user-select:text;';
   labelEl.replaceWith(inp);
-  inp.focus(); inp.select();
+  inp.focus();
+  inp.select();
+
   const finish = () => {
     const v = inp.value.trim();
-    if (v && v !== data[ci].name) { data[ci].name = v; commit('שם קטגוריה עודכן'); } else render();
+    if (v && v !== data[ci].name) {
+      data[ci].name = v;
+      commit('שם קטגוריה עודכן');
+    } else {
+      render();
+    }
   };
+
   inp.addEventListener('blur', finish);
-  inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); if (e.key === 'Escape') { inp.value = data[ci].name; inp.blur(); } });
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') inp.blur();
+    if (e.key === 'Escape') {
+      inp.value = data[ci].name;
+      inp.blur();
+    }
+  });
 }
 
-// ── Category drag (sorting) ──────────────────────────────────
 let catDrag = null;
 const catGhost = document.getElementById('cat-drag-ghost');
 
-// insert-line indicator
 const catInsertLine = document.createElement('div');
 catInsertLine.style.cssText = `
-  position:fixed; left:0; right:0; height:3px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 3px;
   background: rgba(255,255,255,0.7);
-  border-radius:2px; z-index:9997; pointer-events:none;
-  display:none;
+  border-radius: 2px;
+  z-index: 9997;
+  pointer-events: none;
+  display: none;
   box-shadow: 0 0 8px rgba(255,255,255,0.4);
 `;
 document.body.appendChild(catInsertLine);
@@ -742,26 +1020,21 @@ function startCatDrag(ci, tabEl, startY) {
   const wrappers = Array.from(document.querySelectorAll('.cat-wrapper'));
   const el = wrappers[ci];
   const rect = el.getBoundingClientRect();
-
-  // snapshot original positions
   const origRects = wrappers.map(w => w.getBoundingClientRect());
 
-  // make dragged element fixed
-  el.style.cssText += `
-    position:fixed;
-    top:${rect.top}px; left:${rect.left}px;
-    width:${rect.width}px;
-    z-index:9999;
-    box-shadow:0 12px 40px rgba(0,0,0,0.8);
-    opacity:0.97;
-    transition:none;
-    pointer-events:none;
-    margin:0;
-  `;
+  el.style.position = 'fixed';
+  el.style.top = rect.top + 'px';
+  el.style.left = rect.left + 'px';
+  el.style.width = rect.width + 'px';
+  el.style.zIndex = '9999';
+  el.style.boxShadow = '0 12px 40px rgba(0,0,0,0.8)';
+  el.style.opacity = '0.97';
+  el.style.transition = 'none';
+  el.style.pointerEvents = 'none';
+  el.style.margin = '0';
 
-  // placeholder to keep space
   const placeholder = document.createElement('div');
-  placeholder.style.cssText = `height:${rect.height}px; margin-bottom:6px; flex-shrink:0;`;
+  placeholder.style.cssText = \`height:\${rect.height}px; margin-bottom:6px; flex-shrink:0;\`;
   el.parentNode.insertBefore(placeholder, el);
 
   catDrag = { ci, el, placeholder, origRects, startY, fixedTop: rect.top, insertIdx: ci };
@@ -772,76 +1045,76 @@ function moveFloatingCat(y) {
   if (!catDrag) return;
   const { el, origRects, ci, startY, fixedTop } = catDrag;
 
-  // move dragged element
   const newTop = fixedTop + (y - startY);
   el.style.top = newTop + 'px';
   const centerY = newTop + origRects[ci].height / 2;
 
-  // find insert index using ORIGINAL rects (before any transforms)
-  // imagine all items in original positions, where does centerY fall?
-  let insertIdx = 0;
-  for (let i = 0; i < origRects.length; i++) {
-    if (i === ci) continue;
-    const mid = origRects[i].top + origRects[i].height / 2;
-    if (centerY > mid) {
-      insertIdx = i >= ci ? i : i;
-    }
-  }
-  // if centerY is above everything, insertIdx stays 0 unless ci=0
-  // recalculate cleanly: find first item whose mid is above centerY
-  insertIdx = ci; // default: no move
+  let insertIdx = ci;
   let found = false;
-  // build list of indices excluding ci
   const others = origRects.map((r, i) => i).filter(i => i !== ci);
+
   for (let j = 0; j < others.length; j++) {
     const i = others[j];
     const mid = origRects[i].top + origRects[i].height / 2;
     if (centerY <= mid) {
-      // insert before i
       insertIdx = i > ci ? i - 1 : i;
       found = true;
       break;
     }
   }
-  if (!found) {
-    // below everything
-    insertIdx = origRects.length - 1;
-  }
+
+  if (!found) insertIdx = origRects.length - 1;
+
   insertIdx = Math.max(0, Math.min(data.length - 1, insertIdx));
   catDrag.insertIdx = insertIdx;
 
-  // shift other wrappers
   const wrappers = Array.from(document.querySelectorAll('.cat-wrapper'));
   const dragH = origRects[ci].height + 6;
+
   wrappers.forEach((w, i) => {
     if (i === ci) return;
     let shift = 0;
     if (ci < insertIdx && i > ci && i <= insertIdx) shift = -dragH;
     if (ci > insertIdx && i >= insertIdx && i < ci) shift = dragH;
-    w.style.transform = `translateY(${shift}px)`;
+    w.style.transform = \`translateY(\${shift}px)\`;
     w.style.transition = 'transform 0.18s ease';
   });
 
-  // insert line
-  if (insertIdx === ci) { catInsertLine.style.display = 'none'; return; }
+  if (insertIdx === ci) {
+    catInsertLine.style.display = 'none';
+    return;
+  }
+
   let lineY;
   if (insertIdx < ci) {
     lineY = origRects[insertIdx].top;
   } else {
     lineY = origRects[insertIdx].bottom + 3;
   }
+
   catInsertLine.style.display = 'block';
   catInsertLine.style.top = lineY + 'px';
 }
 
-function endCatDrag(y) {
+function endCatDrag() {
   if (!catDrag) return;
   const { el, placeholder, ci, insertIdx } = catDrag;
 
-  // cleanup
   catInsertLine.style.display = 'none';
-  el.style.cssText = '';
+
+  el.style.position = '';
+  el.style.top = '';
+  el.style.left = '';
+  el.style.width = '';
+  el.style.zIndex = '';
+  el.style.boxShadow = '';
+  el.style.opacity = '';
+  el.style.transition = '';
+  el.style.pointerEvents = '';
+  el.style.margin = '';
+
   placeholder.remove();
+
   document.querySelectorAll('.cat-wrapper').forEach(w => {
     w.style.transform = '';
     w.style.transition = '';
@@ -858,7 +1131,6 @@ function endCatDrag(y) {
   }
 }
 
-// ── Render ───────────────────────────────────────────────────
 function render() {
   const board = document.getElementById('board');
   board.innerHTML = '';
@@ -867,13 +1139,12 @@ function render() {
     const wrapper = document.createElement('div');
     wrapper.className = 'cat-wrapper';
 
-    // Side tab with category name + dynamic count
     const tab = document.createElement('div');
     tab.className = 'cat-tab';
     tab.dataset.ci = ci;
 
-    // Long press → drag (for sorting), short press → collapse
     let tabPressTimer = null, tabDragging = false;
+
     tab.addEventListener('pointerdown', e => {
       if (catEditMode) return;
       tabDragging = false;
@@ -882,35 +1153,72 @@ function render() {
         tabDragging = true;
         startCatDrag(ci, tab, e.clientY);
       }, 500);
-    }, { passive: true });
+    });
+
     tab.addEventListener('touchmove', e => {
       if (!tabDragging) return;
       e.preventDefault();
       const t = e.touches[0];
       moveFloatingCat(t.clientY);
     }, { passive: false });
+
     tab.addEventListener('touchend', e => {
-      if (tabDragging) { endCatDrag(e.changedTouches[0].clientY); tabDragging = false; return; }
-      if (tabPressTimer) { clearTimeout(tabPressTimer); tabPressTimer = null; toggleCollapse(ci); }
+      if (tabDragging) {
+        endCatDrag(e.changedTouches[0].clientY);
+        tabDragging = false;
+        return;
+      }
+      if (tabPressTimer) {
+        clearTimeout(tabPressTimer);
+        tabPressTimer = null;
+        toggleCollapse(ci);
+      }
     });
+
     tab.addEventListener('touchcancel', () => {
-      clearTimeout(tabPressTimer); tabPressTimer = null;
-      if (tabDragging) { tabDragging = false; catDrag = null; catGhost.style.display = 'none'; document.querySelectorAll('.cat-wrapper').forEach(w => w.classList.remove('cat-dragging','cat-drag-above','cat-drag-below')); render(); }
+      clearTimeout(tabPressTimer);
+      tabPressTimer = null;
+      if (tabDragging) {
+        tabDragging = false;
+        catDrag = null;
+        catGhost.style.display = 'none';
+        render();
+      }
     });
+
     tab.addEventListener('pointermove', e => {
       if (!tabDragging) {
-        if (Math.abs(e.movementY) > 4) { clearTimeout(tabPressTimer); tabPressTimer = null; }
+        if (Math.abs(e.movementY) > 4) {
+          clearTimeout(tabPressTimer);
+          tabPressTimer = null;
+        }
         return;
       }
       moveFloatingCat(e.clientY);
     });
+
     tab.addEventListener('pointerup', e => {
-      if (tabDragging) { endCatDrag(e.clientY); tabDragging = false; return; }
-      if (tabPressTimer) { clearTimeout(tabPressTimer); tabPressTimer = null; toggleCollapse(ci); }
+      if (tabDragging) {
+        endCatDrag(e.clientY);
+        tabDragging = false;
+        return;
+      }
+      if (tabPressTimer) {
+        clearTimeout(tabPressTimer);
+        tabPressTimer = null;
+        toggleCollapse(ci);
+      }
     });
+
     tab.addEventListener('pointercancel', () => {
-      clearTimeout(tabPressTimer); tabPressTimer = null;
-      if (tabDragging) { tabDragging = false; catDrag = null; catGhost.style.display = 'none'; document.querySelectorAll('.cat-wrapper').forEach(w => w.classList.remove('cat-dragging','cat-drag-above','cat-drag-below')); render(); }
+      clearTimeout(tabPressTimer);
+      tabPressTimer = null;
+      if (tabDragging) {
+        tabDragging = false;
+        catDrag = null;
+        catGhost.style.display = 'none';
+        render();
+      }
     });
 
     const tabLabel = document.createElement('span');
@@ -918,18 +1226,21 @@ function render() {
     tabLabel.textContent = cat.name;
     tab.appendChild(tabLabel);
 
-    // Count
     const tabCount = document.createElement('span');
     tabCount.className = 'cat-tab-count';
+
     if (focusCol !== null) {
       tabCount.textContent = (cat.cols[focusCol] || []).length;
-      tabCount.style.color = ['var(--green)', 'var(--orange)', 'var(--neutral)'][focusCol];
+      tabCount.style.color = [
+        getComputedStyle(document.documentElement).getPropertyValue('--green').trim(),
+        getComputedStyle(document.documentElement).getPropertyValue('--orange').trim(),
+        getComputedStyle(document.documentElement).getPropertyValue('--neutral').trim()
+      ][focusCol];
     } else {
       tabCount.textContent = cat.cols.reduce((s, c) => s + c.length, 0);
     }
     tab.appendChild(tabCount);
 
-    // Edit mode actions (delete + pencil)
     const editActions = document.createElement('div');
     editActions.className = 'cat-edit-actions';
 
@@ -937,13 +1248,19 @@ function render() {
     delBtn.className = 'cat-edit-del';
     delBtn.textContent = '×';
     delBtn.addEventListener('pointerdown', e => e.stopPropagation());
-    delBtn.addEventListener('click', e => { e.stopPropagation(); showCatDeleteConfirm(ci, tab); });
+    delBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      showCatDeleteConfirm(ci, tab);
+    });
 
     const pencilBtn = document.createElement('div');
     pencilBtn.className = 'cat-edit-pencil';
     pencilBtn.textContent = '✏️';
     pencilBtn.addEventListener('pointerdown', e => e.stopPropagation());
-    pencilBtn.addEventListener('click', e => { e.stopPropagation(); openCatRename(ci, tabLabel); });
+    pencilBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      openCatRename(ci, tabLabel);
+    });
 
     editActions.appendChild(delBtn);
     editActions.appendChild(pencilBtn);
@@ -952,7 +1269,12 @@ function render() {
     const card = document.createElement('div');
     card.className = 'category-card';
 
-    if (cat.collapsed && focusCol === null) { wrapper.appendChild(tab); wrapper.appendChild(card); board.appendChild(wrapper); return; }
+    if (cat.collapsed && focusCol === null) {
+      wrapper.appendChild(tab);
+      wrapper.appendChild(card);
+      board.appendChild(wrapper);
+      return;
+    }
 
     const colsEl = document.createElement('div');
     colsEl.className = 'cat-cols';
@@ -960,10 +1282,9 @@ function render() {
     [0, 1, 2].forEach(ki => {
       const colClass = ['regular', 'current', 'future'][ki];
       const col = document.createElement('div');
-      col.className = `col ${colClass}`;
-      col.dataset.ci = ci; col.dataset.ki = ki;
-
-      // drag-over handled in chip pointermove
+      col.className = \`col \${colClass}\`;
+      col.dataset.ci = ci;
+      col.dataset.ki = ki;
 
       (cat.cols[ki] || []).forEach((item, ii) => {
         const text = item.t;
@@ -973,13 +1294,13 @@ function render() {
         chip.className = 'chip';
         if (flag) chip.dataset.flag = flag;
 
-        // Flag icon
         if (flag && FLAG_ICON[flag]) {
           const iconEl = document.createElement('span');
           iconEl.className = 'chip-flag';
           iconEl.textContent = FLAG_ICON[flag];
           chip.appendChild(iconEl);
         }
+
         const textEl = document.createElement('span');
         textEl.className = 'chip-text';
         textEl.textContent = text;
@@ -989,18 +1310,18 @@ function render() {
         chip.dataset.ki = ki;
         chip.dataset.ii = ii;
 
-        // ── Tap → flag picker / Long press → drag ──
         let isDragging = false;
         let pressStartX = 0, pressStartY = 0;
-
-        // MOUSE
         let pickerWasOpen = false;
+        let pendingPicker = null;
+
         chip.addEventListener('mousedown', e => {
           if (e.button !== 0) return;
           e.preventDefault();
           pickerWasOpen = !!(activePicker && activePicker._chip === chip);
           isDragging = false;
-          pressStartX = e.clientX; pressStartY = e.clientY;
+          pressStartX = e.clientX;
+          pressStartY = e.clientY;
           clearTimeout(longPressTimer);
           if (focusCol !== null) return;
           longPressTimer = setTimeout(() => {
@@ -1008,27 +1329,34 @@ function render() {
             startDrag(ci, ki, ii, chip, text, e.clientX, e.clientY);
           }, LONG_MS);
         });
+
         chip.addEventListener('mousemove', e => {
-          if (Math.abs(e.clientX - pressStartX) > 6 || Math.abs(e.clientY - pressStartY) > 6)
+          if (Math.abs(e.clientX - pressStartX) > 6 || Math.abs(e.clientY - pressStartY) > 6) {
             clearTimeout(longPressTimer);
+          }
         });
-        let pendingPicker = null;
+
         chip.addEventListener('mouseup', () => {
           clearTimeout(longPressTimer);
           if (drag) {
             const over = document.querySelector('.col.drag-over');
-            if (over) endDrag(parseInt(over.dataset.ci), parseInt(over.dataset.ki));
+            if (over) endDrag(parseInt(over.dataset.ci, 10), parseInt(over.dataset.ki, 10));
             else cancelDrag();
             return;
           }
-          if (isDragging) { isDragging = false; return; }
+          if (isDragging) {
+            isDragging = false;
+            return;
+          }
           isDragging = false;
           clearTimeout(pendingPicker);
           if (pickerWasOpen) {
             closeFlagPicker();
           } else {
             pendingPicker = setTimeout(() => {
-              const _ci = parseInt(chip.dataset.ci), _ki = parseInt(chip.dataset.ki), _ii = parseInt(chip.dataset.ii);
+              const _ci = parseInt(chip.dataset.ci, 10);
+              const _ki = parseInt(chip.dataset.ki, 10);
+              const _ii = parseInt(chip.dataset.ii, 10);
               openFlagPicker(chip, _ci, _ki, _ii, data[_ci].cols[_ki][_ii]?.f || null, data[_ci].cols[_ki][_ii]?.t || '');
             }, 0);
           }
@@ -1041,11 +1369,11 @@ function render() {
           openChipEdit(chip, ci, ki, ii);
         });
 
-        // TOUCH
         chip.addEventListener('touchstart', e => {
           isDragging = false;
           const t = e.touches[0];
-          pressStartX = t.clientX; pressStartY = t.clientY;
+          pressStartX = t.clientX;
+          pressStartY = t.clientY;
           clearTimeout(longPressTimer);
           if (focusCol !== null) return;
           longPressTimer = setTimeout(() => {
@@ -1059,41 +1387,46 @@ function render() {
           const dx = Math.abs(t.clientX - pressStartX);
           const dy = Math.abs(t.clientY - pressStartY);
           if (dx > 6 || dy > 6) clearTimeout(longPressTimer);
-          if (!drag) return; // allow scroll if not dragging
+          if (!drag) return;
           e.preventDefault();
           moveGhost(t.clientX, t.clientY);
           clearDragOver();
           const el = document.elementFromPoint(t.clientX, t.clientY);
           const over = el && el.closest('.col');
-          if (over && parseInt(over.dataset.ci) === drag.ci) over.classList.add('drag-over');
+          if (over && parseInt(over.dataset.ci, 10) === drag.ci) over.classList.add('drag-over');
         }, { passive: false });
 
         chip.addEventListener('touchend', e => {
           clearTimeout(longPressTimer);
           if (drag) {
             const over = document.querySelector('.col.drag-over');
-            if (over) endDrag(parseInt(over.dataset.ci), parseInt(over.dataset.ki));
+            if (over) endDrag(parseInt(over.dataset.ci, 10), parseInt(over.dataset.ki, 10));
             else cancelDrag();
             return;
           }
           const t = e.changedTouches[0];
           const dy = Math.abs(t.clientY - pressStartY);
           if (!isDragging && dy < 8) {
-            const _ci = parseInt(chip.dataset.ci), _ki = parseInt(chip.dataset.ki), _ii = parseInt(chip.dataset.ii);
+            const _ci = parseInt(chip.dataset.ci, 10);
+            const _ki = parseInt(chip.dataset.ki, 10);
+            const _ii = parseInt(chip.dataset.ii, 10);
             openFlagPicker(chip, _ci, _ki, _ii, data[_ci].cols[_ki][_ii]?.f || null, data[_ci].cols[_ki][_ii]?.t || '');
           }
           isDragging = false;
         });
 
-        chip.addEventListener('touchcancel', () => { clearTimeout(longPressTimer); cancelDrag(); });
+        chip.addEventListener('touchcancel', () => {
+          clearTimeout(longPressTimer);
+          cancelDrag();
+        });
 
         col.appendChild(chip);
       });
 
-      // ── Add row (hidden in focus mode) ──
       if (focusCol === null) {
         const addRow = document.createElement('div');
         addRow.className = 'add-row';
+
         const addInp = document.createElement('input');
         addInp.className = 'add-inp';
         addInp.placeholder = '+';
@@ -1107,20 +1440,29 @@ function render() {
         addInp.addEventListener('paste', e => {
           e.preventDefault();
           const txt = (e.clipboardData || window.clipboardData).getData('text');
-          const lines = txt.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-          if (lines.length <= 1) { addInp.value = txt.trim(); return; }
+          const lines = txt.split(/\\r?\\n/).map(l => l.trim()).filter(Boolean);
+          if (lines.length <= 1) {
+            addInp.value = txt.trim();
+            return;
+          }
           lines.forEach(l => data[ci].cols[ki].push({ t: l, f: null }));
-          commit(`${lines.length} הרגלים נוספו`);
+          commit(\`\${lines.length} הרגלים נוספו\`);
         });
+
         addInp.addEventListener('keydown', e => {
-          if (e.key === 'Enter') { e.preventDefault(); submitAdd(addInp, ci, ki); }
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            submitAdd(addInp, ci, ki);
+          }
         });
+
         addInp.addEventListener('blur', () => submitAdd(addInp, ci, ki));
 
         addRow.appendChild(addInp);
         addRow.appendChild(doneBtn);
         col.appendChild(addRow);
       }
+
       colsEl.appendChild(col);
     });
 
@@ -1130,13 +1472,16 @@ function render() {
     board.appendChild(wrapper);
   });
 
-  // Equalize all tab widths to the widest one
   const tabs = board.querySelectorAll('.cat-tab');
   let maxW = 0;
-  tabs.forEach(t => { t.style.width = 'auto'; maxW = Math.max(maxW, t.offsetWidth); });
-  tabs.forEach(t => { t.style.width = maxW + 'px'; });
+  tabs.forEach(t => {
+    t.style.width = 'auto';
+    maxW = Math.max(maxW, t.offsetWidth);
+  });
+  tabs.forEach(t => {
+    t.style.width = maxW + 'px';
+  });
 
-  // Sync legend header width
   const hdr = document.getElementById('catLegendHeader');
   if (hdr) {
     if (maxW > 0) {
@@ -1155,9 +1500,13 @@ function submitAdd(inp, ci, ki) {
   data[ci].cols[ki].push({ t: val, f: null });
   commit('הרגל נוסף');
   inp.value = '';
+
   setTimeout(() => {
-    const all = document.querySelectorAll(`.category-card:nth-child(${ci+1}) .add-inp`);
-    if (all[ki]) all[ki].focus();
+    const catWrappers = document.querySelectorAll('.cat-wrapper');
+    const targetWrapper = catWrappers[ci];
+    if (!targetWrapper) return;
+    const inputs = targetWrapper.querySelectorAll('.add-inp');
+    if (inputs[ki]) inputs[ki].focus();
   }, 30);
 }
 
@@ -1166,40 +1515,51 @@ function addCategory() {
   const name = inp.value.trim();
   if (!name) return;
   data.push({ name, cols: [[], [], []] });
-  commit('קטגוריה נוספה'); inp.value = '';
+  commit('קטגוריה נוספה');
+  inp.value = '';
 }
 
 document.getElementById('newCatInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') addCategory();
 });
 
-
-
 let _confirmPickerPos = { top: 0, chipCx: 0 };
 
 function showCatDeleteConfirm(ci, tabEl) {
   document.getElementById('catDeletePicker')?.remove();
+
   const rect = tabEl.getBoundingClientRect();
   const picker = document.createElement('div');
   picker.className = 'flag-picker delete-confirm-picker';
   picker.id = 'catDeletePicker';
-  picker.innerHTML = `<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק קטגוריה</span></button>`;
-  picker.style.top  = '-9999px';
+  picker.innerHTML = \`<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק קטגוריה</span></button>\`;
+  picker.style.top = '-9999px';
   picker.style.left = '-9999px';
   document.body.appendChild(picker);
-  const pw = picker.offsetWidth, ph = picker.offsetHeight;
+
+  const pw = picker.offsetWidth;
+  const ph = picker.offsetHeight;
   let left = rect.left - pw - 6;
-  let top  = rect.top + rect.height / 2 - ph / 2;
+  let top = rect.top + rect.height / 2 - ph / 2;
+
   if (left < 8) left = rect.right + 6;
   top = Math.max(8, Math.min(top, window.innerHeight - ph - 8));
-  picker.style.top  = top  + 'px';
+
+  picker.style.top = top + 'px';
   picker.style.left = left + 'px';
+
   const onOutside = e => {
-    if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); }
+    if (!picker.contains(e.target)) {
+      picker.remove();
+      document.removeEventListener('pointerdown', onOutside, true);
+    }
   };
+
   setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 50);
+
   picker.querySelector('.dp-ok').addEventListener('click', () => {
-    picker.remove(); document.removeEventListener('pointerdown', onOutside, true);
+    picker.remove();
+    document.removeEventListener('pointerdown', onOutside, true);
     data.splice(ci, 1);
     commit('קטגוריה נמחקה');
   });
@@ -1211,77 +1571,92 @@ function showDeleteConfirm(habitText, onConfirm) {
   const picker = document.createElement('div');
   picker.className = 'flag-picker delete-confirm-picker';
   picker.id = 'deletePicker';
-  picker.innerHTML = `<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק</span></button>`;
+  picker.innerHTML = \`<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק</span></button>\`;
   picker.style.top = _confirmPickerPos.top + 'px';
-  picker.style.left = '-9999px'; // hidden until measured
+  picker.style.left = '-9999px';
   document.body.appendChild(picker);
 
-  // center horizontally around chip center
   const pw = picker.offsetWidth;
   const left = Math.max(8, Math.min(_confirmPickerPos.chipCx - pw / 2, window.innerWidth - pw - 8));
   picker.style.left = left + 'px';
 
   const onOutside = e => {
-    if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); }
+    if (!picker.contains(e.target)) {
+      picker.remove();
+      document.removeEventListener('pointerdown', onOutside, true);
+    }
   };
+
   setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 50);
 
   picker.querySelector('.dp-ok').addEventListener('click', () => {
-    picker.remove(); document.removeEventListener('pointerdown', onOutside, true);
+    picker.remove();
+    document.removeEventListener('pointerdown', onOutside, true);
     onConfirm();
   });
 }
 
 function showRedoDeleteConfirm(onConfirm) {
   document.getElementById('redoConfirmPicker')?.remove();
+
   const btn = document.getElementById('redoBtn');
   const rect = btn.getBoundingClientRect();
 
   const picker = document.createElement('div');
   picker.className = 'flag-picker delete-confirm-picker';
   picker.id = 'redoConfirmPicker';
-  picker.innerHTML = `<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק שוב</span></button>`;
-  picker.style.top  = '-9999px';
+  picker.innerHTML = \`<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק שוב</span></button>\`;
+  picker.style.top = '-9999px';
   picker.style.left = '-9999px';
   document.body.appendChild(picker);
 
   const pw = picker.offsetWidth;
   const ph = picker.offsetHeight;
   let left = rect.left + rect.width / 2 - pw / 2;
-  let top  = rect.bottom + 6;
+  let top = rect.bottom + 6;
+
   left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
   if (top + ph > window.innerHeight) top = rect.top - ph - 6;
-  picker.style.top  = top  + 'px';
+
+  picker.style.top = top + 'px';
   picker.style.left = left + 'px';
 
   const onOutside = e => {
-    if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); }
+    if (!picker.contains(e.target)) {
+      picker.remove();
+      document.removeEventListener('pointerdown', onOutside, true);
+    }
   };
+
   setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 50);
 
   picker.querySelector('.dp-ok').addEventListener('click', () => {
-    picker.remove(); document.removeEventListener('pointerdown', onOutside, true);
+    picker.remove();
+    document.removeEventListener('pointerdown', onOutside, true);
     onConfirm();
   });
 }
 
-// ── Focus mode ───────────────────────────────────────────────
 let focusCol = null;
 
 function setFocusCol(ki) {
   const items = document.querySelectorAll('.col-legend-item');
+
   if (focusCol === ki) {
     focusCol = null;
     document.body.classList.remove('focus-mode', 'focus-0', 'focus-1', 'focus-2');
     items.forEach(el => el.classList.remove('active-focus', 'dimmed'));
   } else {
     focusCol = ki;
-    document.body.className = `focus-mode focus-${ki}`;
+    document.body.classList.remove('focus-0', 'focus-1', 'focus-2');
+    document.body.classList.add('focus-mode', \`focus-\${ki}\`);
+
     items.forEach((el, i) => {
       el.classList.toggle('active-focus', i === ki);
       el.classList.toggle('dimmed', i !== ki);
     });
   }
+
   render();
 }
 
@@ -1291,6 +1666,5 @@ document.querySelectorAll('.col-legend-item').forEach((el, i) => {
 
 render();
 </script>
-
 </body>
 </html>
