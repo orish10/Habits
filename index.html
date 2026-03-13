@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -139,6 +140,35 @@ line-height: 1.3;
 font-size: 12px; font-weight: 700;
 color: #636366;
 }
+.cat-edit-actions {
+display: none;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+gap: 6px;
+padding: 4px 6px 6px;
+}
+body.cat-edit-mode .cat-edit-actions { display: -webkit-flex; display: flex; }
+body.cat-edit-mode .cat-tab-count { display: none; }
+.cat-edit-del {
+font-size: 18px; color: #ff3b30;
+width: 28px; height: 28px;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+border-radius: 50%;
+background: rgba(255,59,48,0.2);
+cursor: pointer;
+}
+.cat-edit-pencil {
+font-size: 14px; color: #aeaeb2;
+width: 28px; height: 28px;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+border-radius: 50%;
+background: #1c1c1e;
+cursor: pointer;
+}
 
 /* ── Category card ── */
 .category-card {
@@ -183,8 +213,144 @@ width: 100%;
 .col.current .chip { background: #3d2a0e; color: #d4955a; }
 .col.future  .chip { background: #222224; color: #8e8e93; }
 
+.chip[data-flag=“focus”] {
+-webkit-box-shadow: 0 0 0 2.5px rgba(255,255,255,0.55);
+box-shadow: 0 0 0 2.5px rgba(255,255,255,0.55);
+}
+.chip[data-flag=“pause”] {
+background: transparent !important;
+color: #6e6e73 !important;
+border: 1.5px dashed #48484a;
+}
+.chip[data-flag=“focus-pause”], .chip[data-flag=“pause-focus”] {
+-webkit-box-shadow: 0 0 0 2.5px rgba(255,255,255,0.55);
+box-shadow: 0 0 0 2.5px rgba(255,255,255,0.55);
+background: transparent !important;
+color: #6e6e73 !important;
+border: 1.5px dashed #48484a;
+}
+.chip[data-flag=“urgent”] {
+background: rgba(255,59,48,0.15) !important;
+color: #ff3b30 !important;
+}
 .chip.dragging { opacity: 0.2; -webkit-transform: scale(0.94); transform: scale(0.94); }
 .chip-text { display: block; text-align: center; }
+
+/* ── Flag picker ── */
+.flag-picker {
+position: fixed;
+background: #2c2c2e;
+border-radius: 14px;
+padding: 6px;
+display: -webkit-flex; display: flex;
+gap: 4px;
+z-index: 10000;
+-webkit-box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+}
+.fp-btn {
+background: #1c1c1e;
+border-radius: 10px;
+padding: 10px;
+cursor: pointer;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+min-width: 44px; min-height: 44px;
+}
+.fp-btn.active { background: #3a3a3c; outline: 1.5px solid rgba(255,255,255,0.15); }
+.fp-btn.fp-danger .fp-icon { color: #ff3b30; }
+.fp-icon { font-size: 20px; color: #ffffff; }
+.fp-focus .fp-icon { font-size: 26px; }
+.fp-label { display: none; }
+
+.delete-confirm-picker { padding: 5px; }
+.delete-confirm-picker .fp-btn { min-width: 80px; -webkit-justify-content: center; justify-content: center; }
+.dp-delete-label { font-size: 15px; font-weight: 600; color: #ff3b30; font-family: ‘Heebo’, sans-serif; }
+
+/* ── Drag ghost ── */
+#drag-ghost {
+position: fixed; pointer-events: none;
+background: #2c2c2e; border-radius: 10px;
+padding: 7px 14px;
+font-family: ‘Heebo’, sans-serif; font-size: 13px; font-weight: 600; color: #fff;
+z-index: 9999; max-width: 200px; text-align: center;
+-webkit-box-shadow: 0 8px 30px rgba(0,0,0,0.7); box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+display: none;
+}
+#cat-drag-ghost { display: none; }
+
+/* ── Edit mode ── */
+.chip.editing { background: #2c2c2e !important; color: #fff !important; }
+.chip-input {
+background: none;
+font-family: ‘Heebo’, sans-serif; font-size: 12px; font-weight: 500;
+color: #fff; text-align: center;
+width: 100%; resize: none; overflow: hidden;
+-webkit-user-select: text; user-select: text;
+display: block;
+}
+
+/* ── Add row ── */
+.add-row {
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+gap: 4px;
+margin-top: 2px; padding: 2px;
+border-radius: 8px;
+}
+.add-row:focus-within { background: #2c2c2e; }
+.add-inp {
+-webkit-flex: 1; flex: 1;
+font-family: ‘Heebo’, sans-serif; font-size: 12px; color: #fff;
+padding: 4px 6px; min-width: 0;
+-webkit-user-select: text; user-select: text;
+}
+.add-inp::-webkit-input-placeholder { color: #3a3a3c; }
+.add-inp::placeholder { color: #3a3a3c; }
+.add-done-btn {
+display: none;
+background: #2c2c2e;
+border-radius: 7px;
+color: #8e8e93;
+font-family: ‘Heebo’, sans-serif;
+font-size: 11px; font-weight: 600; padding: 3px 8px;
+cursor: pointer; white-space: nowrap; -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+.add-row:focus-within .add-done-btn { display: block; }
+
+/* ── Add category ── */
+.add-cat-bar { display: -webkit-flex; display: flex; gap: 8px; margin-top: 6px; }
+.add-cat-inp {
+-webkit-flex: 1; flex: 1;
+background: #1c1c1e;
+border-radius: 14px;
+padding: 11px 16px; color: #fff;
+font-family: ‘Heebo’, sans-serif; font-size: 14px;
+-webkit-user-select: text; user-select: text;
+}
+.add-cat-inp::-webkit-input-placeholder { color: #3a3a3c; }
+.add-cat-inp::placeholder { color: #3a3a3c; }
+.add-cat-btn {
+background: #2c2c2e;
+border-radius: 14px;
+color: #8e8e93;
+font-family: ‘Heebo’, sans-serif;
+font-size: 14px; font-weight: 600; padding: 11px 18px;
+cursor: pointer;
+}
+
+/* ── Focus mode ── */
+body.focus-mode .add-row { display: none; }
+body.focus-mode .add-cat-bar { display: none; }
+body.focus-0 .col.current, body.focus-0 .col.future  { opacity: 0.25; pointer-events: none; }
+body.focus-1 .col.regular, body.focus-1 .col.future  { opacity: 0.25; pointer-events: none; }
+body.focus-2 .col.regular, body.focus-2 .col.current { opacity: 0.25; pointer-events: none; }
+
+@media (max-width: 480px) {
+.chip { font-size: 11px; padding: 5px 7px; }
+.col  { padding: 8px 7px 5px; }
+}
 
 /* ── Undo toast ── */
 #undo-toast {
@@ -199,7 +365,7 @@ padding: 10px 8px 10px 16px;
 display: -webkit-flex; display: flex;
 -webkit-align-items: center; align-items: center;
 gap: 10px;
-font-family: 'Heebo', sans-serif;
+font-family: ‘Heebo’, sans-serif;
 font-size: 13px; font-weight: 500;
 color: #e0e0e0;
 white-space: nowrap;
@@ -220,39 +386,38 @@ pointer-events: all;
 background: rgba(255,255,255,0.1);
 border-radius: 10px;
 color: #fff;
-font-family: 'Heebo', sans-serif;
+font-family: ‘Heebo’, sans-serif;
 font-size: 13px; font-weight: 700;
 padding: 5px 12px;
 cursor: pointer;
 -webkit-flex-shrink: 0; flex-shrink: 0;
 }
 </style>
-</head>
 
+</head>
 <body>
 
 <div class="topbar">
-  <h1>הרגלים O v6</h1>
+  <h1>הרגלים O v5</h1>
   <div class="undo-redo">
-    <button class="ur-btn" id="undoBtn" onclick="undo()" disabled>↺</button>
-    <button class="ur-btn" id="redoBtn" onclick="redo()" disabled>↻</button>
+    <button class="ur-btn" id="undoBtn" onclick="undo()" title="אחורה (Ctrl+Z)" disabled>↺</button>
+    <button class="ur-btn" id="redoBtn" onclick="redo()" title="קדימה (Ctrl+Y)" disabled>↻</button>
   </div>
 </div>
 
 <div class="legends">
   <div class="legends-row">
-    <div class="col-legend-header">קטגוריה</div>
+    <div class="col-legend-header" id="catLegendHeader">קטגוריה</div>
     <div class="col-legend">
       <div class="col-legend-item regular"><div class="legend-dot"></div>ברגיל</div>
       <div class="col-legend-item current"><div class="legend-dot"></div>בתהליך</div>
-      <div class="col-legend-item future"><div class="legend-dot"></div>לשפר בעתיד</div>
+      <div class="col-legend-item future" ><div class="legend-dot"></div>לשפר בעתיד</div>
     </div>
   </div>
 </div>
 
 <div class="wrapper">
   <div id="board"></div>
-
   <div class="add-cat-bar">
     <input class="add-cat-inp" id="newCatInput" placeholder="+ קטגוריה חדשה..." />
     <button class="add-cat-btn" onclick="addCategory()">הוסף</button>
@@ -263,124 +428,869 @@ cursor: pointer;
   <span id="toast-msg">בוצע</span>
   <button class="toast-undo-btn" onclick="toastUndo()">ביטול</button>
 </div>
-
 <div id="drag-ghost"></div>
+<div id="cat-drag-ghost"></div>
 
 <script>
+document.addEventListener('contextmenu', e => e.preventDefault());
 
-let data = []
-let history = []
-let histIdx = -1
+// ── Flag cycle: null → focus → urgent → pause → null ────────
+const FLAG_CYCLE = [null, 'focus', 'urgent', 'pause'];
+const FLAG_ICON  = {};
 
-function persist(){
-localStorage.setItem("hb8",JSON.stringify(data))
+// ── Default data ─────────────────────────────────────────────
+// Each item: { t: "text", f: null|"urgent"|"focus"|"pause" }
+function mkItems(arr) { return arr.map(t => ({ t, f: null })); }
+
+const DEFAULT = [];
+
+// ── Migrate old string-based saves ──────────────────────────
+function migrate(d) {
+  d.forEach(cat => {
+    cat.cols = cat.cols.map(col =>
+      col.map(item => typeof item === 'string' ? { t: item, f: null } : item)
+    );
+  });
+  return d;
 }
 
-function snapshot(){
-history = history.slice(0,histIdx+1)
-history.push(JSON.parse(JSON.stringify(data)))
-histIdx = history.length-1
+// ── History ──────────────────────────────────────────────────
+const MAX_HIST = 80;
+let history = [], histIdx = -1;
+
+function snapshot() {
+  history = history.slice(0, histIdx + 1);
+  history.push(JSON.parse(JSON.stringify(data)));
+  if (history.length > MAX_HIST) history.shift();
+  histIdx = history.length - 1;
+  updateUR();
+}
+function undo() {
+  if (histIdx <= 0) return;
+  histIdx--;
+  data = JSON.parse(JSON.stringify(history[histIdx]));
+  persist(); render(); updateUR();
+}
+function redo() {
+  if (histIdx >= history.length - 1) return;
+  // check if the state we're redoing INTO is a delete relative to current
+  const next = history[histIdx + 1];
+  const curr = history[histIdx];
+  const nextCount = next.reduce((s, c) => s + c.cols.reduce((a, col) => a + col.length, 0), 0);
+  const currCount = curr.reduce((s, c) => s + c.cols.reduce((a, col) => a + col.length, 0), 0);
+  if (nextCount < currCount) {
+    showRedoDeleteConfirm(() => { histIdx++; data = JSON.parse(JSON.stringify(history[histIdx])); persist(); render(); updateUR(); });
+  } else {
+    histIdx++;
+    data = JSON.parse(JSON.stringify(history[histIdx]));
+    persist(); render(); updateUR();
+  }
+}
+function updateUR() {
+  document.getElementById('undoBtn').disabled = histIdx <= 0;
+  document.getElementById('redoBtn').disabled = histIdx >= history.length - 1;
+}
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey) && e.key==='z' && !e.shiftKey) { e.preventDefault(); undo(); }
+  if ((e.ctrlKey||e.metaKey) && (e.key==='y'||(e.key==='z'&&e.shiftKey))) { e.preventDefault(); redo(); }
+});
+
+// ── Persistence ──────────────────────────────────────────────
+function persist() { localStorage.setItem('hb8', JSON.stringify(data)); }
+function load()    { try { return JSON.parse(localStorage.getItem('hb8')) || null; } catch { return null; } }
+
+let raw = load();
+let data = raw ? migrate(raw) : JSON.parse(JSON.stringify(DEFAULT));
+history = [JSON.parse(JSON.stringify(data))];
+histIdx = 0; updateUR();
+
+function compact(d) {
+  d.forEach(cat => {
+    cat.cols = cat.cols.map(col => col.filter(item => item && item.t && item.t.trim()));
+  });
 }
 
-function undo(){
-if(histIdx<=0)return
-histIdx--
-data = JSON.parse(JSON.stringify(history[histIdx]))
-persist()
-render()
+function toggleCollapse(ci) {
+  data[ci].collapsed = !data[ci].collapsed;
+  persist(); render();
 }
 
-function redo(){
-if(histIdx>=history.length-1)return
-histIdx++
-data = JSON.parse(JSON.stringify(history[histIdx]))
-persist()
-render()
+// ── Toast ─────────────────────────────────────────────────────
+let toastTimer = null;
+
+function showToast(msg) {
+  const toast = document.getElementById('undo-toast');
+  document.getElementById('toast-msg').textContent = msg;
+  clearTimeout(toastTimer);
+  toast.classList.add('show');
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 4000);
 }
 
-function commit(msg){
-persist()
-snapshot()
-render()
-showToast(msg)
+function toastUndo() {
+  document.getElementById('undo-toast').classList.remove('show');
+  clearTimeout(toastTimer);
+  undo();
 }
 
-function showToast(msg){
-const t = document.getElementById("undo-toast")
-document.getElementById("toast-msg").textContent = msg
-t.classList.add("show")
-setTimeout(()=>t.classList.remove("show"),3000)
+function commit(msg) {
+  compact(data); persist(); snapshot(); render();
+  showToast(msg || 'בוצע');
 }
 
-function addCategory(){
-const inp = document.getElementById("newCatInput")
-const name = inp.value.trim()
-if(!name)return
-data.push({name,cols:[[],[],[]]})
-inp.value=""
-commit("קטגוריה נוספה")
+// ── Flag picker ──────────────────────────────────────────────
+let activePicker = null;
+
+function openFlagPicker(chip, ci, ki, ii, currentFlag, habitText) {
+  closeFlagPicker();
+
+  const picker = document.createElement('div');
+  picker.className = 'flag-picker';
+  picker.id = 'flagPicker';
+
+  const isFocused = currentFlag === 'focus' || currentFlag === 'focus-pause';
+  const isPaused  = currentFlag === 'pause'  || currentFlag === 'focus-pause';
+
+  const options = [
+    isFocused
+      ? { flag: 'unfocus', icon: '✕',  label: 'הסר הדגשה', skip: false }
+      : { flag: 'focus',   icon: '*',  label: 'מודגש', cls: 'fp-focus', skip: false },
+    isPaused
+      ? { flag: 'unpause', icon: '▶',  label: 'המשך',       skip: false }
+      : { flag: 'pause',   icon: '⏸', label: 'מושהה',      skip: false },
+    { flag: 'delete', icon: '⊗', label: 'מחק', skip: false, danger: true },
+  ];
+
+  options.filter(opt => !opt.skip).forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'fp-btn' + (opt.danger ? ' fp-danger' : '') + (opt.cls ? ' ' + opt.cls : '');
+    btn.innerHTML = `<span class="fp-icon">${opt.icon}</span><span class="fp-label">${opt.label}</span>`;
+    btn.addEventListener('mousedown', e => e.preventDefault());
+    btn.addEventListener('click', () => {
+      if (opt.flag === 'delete') {
+        const _ci = ci, _ki = ki, _ii = ii;
+        closeFlagPicker();
+        setTimeout(() => {
+          showDeleteConfirm(habitText, () => {
+            data[_ci].cols[_ki].splice(_ii, 1);
+            commit('הרגל נמחק');
+          });
+        }, 50);
+      } else if (opt.flag === 'pause') {
+        // add pause, keep focus if present
+        data[ci].cols[ki][ii].f = isFocused ? 'focus-pause' : 'pause';
+        commit('הרגל הושהה');
+      } else if (opt.flag === 'unpause') {
+        // remove pause, keep focus if present
+        data[ci].cols[ki][ii].f = isFocused ? 'focus' : null;
+        commit('הרגל חודש');
+      } else if (opt.flag === 'focus') {
+        // add focus, keep pause if present
+        data[ci].cols[ki][ii].f = isPaused ? 'focus-pause' : 'focus';
+        commit('סומן כמודגש');
+      } else if (opt.flag === 'unfocus') {
+        // remove focus, keep pause if present
+        data[ci].cols[ki][ii].f = isPaused ? 'pause' : null;
+        commit('הדגשה הוסרה');
+      } else {
+        data[ci].cols[ki][ii].f = opt.flag;
+        commit('בוצע');
+      }
+      closeFlagPicker();
+    });
+    picker.appendChild(btn);
+  });
+
+  document.body.appendChild(picker);
+  activePicker = picker;
+  activePicker._chip = chip;
+
+  const rect = chip.getBoundingClientRect();
+  const pw = picker.offsetWidth;
+  const ph = picker.offsetHeight;
+
+  // position:fixed uses viewport coords — no scrollY needed
+  let left = rect.left + rect.width / 2 - pw / 2;
+  let top  = rect.bottom + 4;
+
+  left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
+  if (rect.bottom + 4 + ph > window.innerHeight) top = rect.top - ph - 4;
+
+  picker.style.top  = top + 'px';
+  picker.style.left = left + 'px';
+  _confirmPickerPos = { top, chipCx: rect.left + rect.width / 2 };
 }
 
-function render(){
-
-const board = document.getElementById("board")
-board.innerHTML=""
-
-data.forEach((cat,ci)=>{
-
-const wrapper = document.createElement("div")
-wrapper.className="cat-wrapper"
-
-const tab = document.createElement("div")
-tab.className="cat-tab"
-
-const label = document.createElement("span")
-label.className="cat-tab-label"
-label.textContent=cat.name
-
-tab.appendChild(label)
-
-const card = document.createElement("div")
-card.className="category-card"
-
-const cols = document.createElement("div")
-cols.className="cat-cols"
-
-cat.cols.forEach((col,ki)=>{
-
-const colEl = document.createElement("div")
-colEl.className="col"
-
-col.forEach((item)=>{
-
-const chip = document.createElement("div")
-chip.className="chip"
-
-const txt = document.createElement("span")
-txt.className="chip-text"
-txt.textContent=item
-
-chip.appendChild(txt)
-colEl.appendChild(chip)
-
-})
-
-cols.appendChild(colEl)
-
-})
-
-card.appendChild(cols)
-wrapper.appendChild(tab)
-wrapper.appendChild(card)
-board.appendChild(wrapper)
-
-})
-
+function openChipEdit(chip, ci, ki, ii) {
+  const text = data[ci].cols[ki][ii].t;
+  chip.classList.add('editing');
+  chip.innerHTML = '';
+  const inp = document.createElement('textarea');
+  inp.className = 'chip-input';
+  inp.value = text;
+  inp.rows = 1;
+  chip.appendChild(inp);
+  // Allow text selection inside input
+  inp.style.webkitUserSelect = 'text';
+  inp.style.userSelect = 'text';
+  inp.focus(); inp.select();
+  const finish = () => {
+    const val = inp.value.trim();
+    if (!val) { data[ci].cols[ki].splice(ii, 1); commit('הרגל נמחק'); }
+    else      { data[ci].cols[ki][ii].t = val;   commit('הרגל עודכן'); }
+  };
+  inp.addEventListener('blur', finish);
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); inp.blur(); }
+    if (e.key === 'Escape') { inp.value = text; inp.blur(); }
+  });
 }
 
-snapshot()
-render()
+function closeFlagPicker() {
+  if (activePicker) { activePicker.remove(); activePicker = null; }
+}
 
+document.addEventListener('pointerdown', e => {
+  if (activePicker && !activePicker.contains(e.target)) closeFlagPicker();
+});
+
+// ── Drag ─────────────────────────────────────────────────────
+let drag = null, longPressTimer = null;
+const LONG_MS = 480;
+const ghost   = document.getElementById('drag-ghost');
+
+function startDrag(ci, ki, ii, el, text, x, y) {
+  closeFlagPicker();
+  drag = { ci, ki, ii, el };
+  el.classList.add('dragging');
+  ghost.textContent = text;
+  ghost.style.display = 'block';
+  moveGhost(x, y);
+}
+function moveGhost(x, y) {
+  ghost.style.left = (x - ghost.offsetWidth / 2) + 'px';
+  ghost.style.top  = (y - 50) + 'px';
+}
+function endDrag(tci, tki) {
+  if (!drag) return;
+  const { ci, ki, ii, el } = drag;
+  el.classList.remove('dragging');
+  ghost.style.display = 'none';
+  clearDragOver();
+  // Only allow drag within the same category
+  if (tci !== null && tci === ci && tki !== ki) {
+    const item = data[ci].cols[ki].splice(ii, 1)[0];
+    // Clear pause flag when moved out of future col
+    if (item.f === 'pause') item.f = null;
+    data[ci].cols[tki].push(item);
+    commit('הרגל הועבר');
+  }
+  drag = null;
+}
+function cancelDrag() {
+  if (!drag) return;
+  drag.el.classList.remove('dragging');
+  ghost.style.display = 'none';
+  drag = null;
+  clearDragOver();
+}
+function clearDragOver() {
+  document.querySelectorAll('.col.drag-over').forEach(c => c.classList.remove('drag-over'));
+}
+
+document.addEventListener('mousemove', e => { if (drag) { moveGhost(e.clientX, e.clientY); clearDragOver(); const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('.col'); if (over && parseInt(over.dataset.ci) === drag.ci) over.classList.add('drag-over'); } });
+document.addEventListener('mouseup',   () => { clearTimeout(longPressTimer); if (drag) cancelDrag(); });
+
+// ── Category edit mode ───────────────────────────────────────
+let catEditMode = false;
+const catLegendHeader = document.getElementById('catLegendHeader');
+catLegendHeader.addEventListener('click', () => {
+  catEditMode = !catEditMode;
+  document.body.classList.toggle('cat-edit-mode', catEditMode);
+  catLegendHeader.classList.toggle('edit-active', catEditMode);
+});
+
+function openCatRename(ci, labelEl) {
+  const inp = document.createElement('input');
+  inp.value = data[ci].name;
+  inp.style.cssText = `background:none;border:none;outline:none;font-family:Heebo,sans-serif;font-size:11px;font-weight:700;color:#fff;text-align:center;width:100%;-webkit-user-select:text;user-select:text;`;
+  labelEl.replaceWith(inp);
+  inp.focus(); inp.select();
+  const finish = () => {
+    const v = inp.value.trim();
+    if (v && v !== data[ci].name) { data[ci].name = v; commit('שם קטגוריה עודכן'); } else render();
+  };
+  inp.addEventListener('blur', finish);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); if (e.key === 'Escape') { inp.value = data[ci].name; inp.blur(); } });
+}
+
+// ── Category drag (sorting) ──────────────────────────────────
+let catDrag = null;
+const catGhost = document.getElementById('cat-drag-ghost');
+
+// insert-line indicator
+const catInsertLine = document.createElement('div');
+catInsertLine.style.cssText = `
+  position:fixed; left:0; right:0; height:3px;
+  background: rgba(255,255,255,0.7);
+  border-radius:2px; z-index:9997; pointer-events:none;
+  display:none;
+  box-shadow: 0 0 8px rgba(255,255,255,0.4);
+`;
+document.body.appendChild(catInsertLine);
+
+function startCatDrag(ci, tabEl, startY) {
+  const wrappers = Array.from(document.querySelectorAll('.cat-wrapper'));
+  const el = wrappers[ci];
+  const rect = el.getBoundingClientRect();
+
+  // snapshot original positions
+  const origRects = wrappers.map(w => w.getBoundingClientRect());
+
+  // make dragged element fixed
+  el.style.cssText += `
+    position:fixed;
+    top:${rect.top}px; left:${rect.left}px;
+    width:${rect.width}px;
+    z-index:9999;
+    box-shadow:0 12px 40px rgba(0,0,0,0.8);
+    opacity:0.97;
+    transition:none;
+    pointer-events:none;
+    margin:0;
+  `;
+
+  // placeholder to keep space
+  const placeholder = document.createElement('div');
+  placeholder.style.cssText = `height:${rect.height}px; margin-bottom:6px; flex-shrink:0;`;
+  el.parentNode.insertBefore(placeholder, el);
+
+  catDrag = { ci, el, placeholder, origRects, startY, fixedTop: rect.top, insertIdx: ci };
+  moveFloatingCat(startY);
+}
+
+function moveFloatingCat(y) {
+  if (!catDrag) return;
+  const { el, origRects, ci, startY, fixedTop } = catDrag;
+
+  // move dragged element
+  const newTop = fixedTop + (y - startY);
+  el.style.top = newTop + 'px';
+  const centerY = newTop + origRects[ci].height / 2;
+
+  // find insert index using ORIGINAL rects (before any transforms)
+  // imagine all items in original positions, where does centerY fall?
+  let insertIdx = 0;
+  for (let i = 0; i < origRects.length; i++) {
+    if (i === ci) continue;
+    const mid = origRects[i].top + origRects[i].height / 2;
+    if (centerY > mid) {
+      insertIdx = i >= ci ? i : i;
+    }
+  }
+  // if centerY is above everything, insertIdx stays 0 unless ci=0
+  // recalculate cleanly: find first item whose mid is above centerY
+  insertIdx = ci; // default: no move
+  let found = false;
+  // build list of indices excluding ci
+  const others = origRects.map((r, i) => i).filter(i => i !== ci);
+  for (let j = 0; j < others.length; j++) {
+    const i = others[j];
+    const mid = origRects[i].top + origRects[i].height / 2;
+    if (centerY <= mid) {
+      // insert before i
+      insertIdx = i > ci ? i - 1 : i;
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    // below everything
+    insertIdx = origRects.length - 1;
+  }
+  insertIdx = Math.max(0, Math.min(data.length - 1, insertIdx));
+  catDrag.insertIdx = insertIdx;
+
+  // shift other wrappers
+  const wrappers = Array.from(document.querySelectorAll('.cat-wrapper'));
+  const dragH = origRects[ci].height + 6;
+  wrappers.forEach((w, i) => {
+    if (i === ci) return;
+    let shift = 0;
+    if (ci < insertIdx && i > ci && i <= insertIdx) shift = -dragH;
+    if (ci > insertIdx && i >= insertIdx && i < ci) shift = dragH;
+    w.style.transform = `translateY(${shift}px)`;
+    w.style.transition = 'transform 0.18s ease';
+  });
+
+  // insert line
+  if (insertIdx === ci) { catInsertLine.style.display = 'none'; return; }
+  let lineY;
+  if (insertIdx < ci) {
+    lineY = origRects[insertIdx].top;
+  } else {
+    lineY = origRects[insertIdx].bottom + 3;
+  }
+  catInsertLine.style.display = 'block';
+  catInsertLine.style.top = lineY + 'px';
+}
+
+function endCatDrag(y) {
+  if (!catDrag) return;
+  const { el, placeholder, ci, insertIdx } = catDrag;
+
+  // cleanup
+  catInsertLine.style.display = 'none';
+  el.style.cssText = '';
+  placeholder.remove();
+  document.querySelectorAll('.cat-wrapper').forEach(w => {
+    w.style.transform = '';
+    w.style.transition = '';
+  });
+
+  catDrag = null;
+
+  if (insertIdx !== ci) {
+    const [item] = data.splice(ci, 1);
+    data.splice(insertIdx, 0, item);
+    commit('קטגוריה הוזזה');
+  } else {
+    render();
+  }
+}
+
+// ── Render ───────────────────────────────────────────────────
+function render() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+
+  data.forEach((cat, ci) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'cat-wrapper';
+
+    // Side tab with category name + dynamic count
+    const tab = document.createElement('div');
+    tab.className = 'cat-tab';
+    tab.dataset.ci = ci;
+
+    // Long press → drag (for sorting), short press → collapse
+    let tabPressTimer = null, tabDragging = false;
+    tab.addEventListener('pointerdown', e => {
+      if (catEditMode) return;
+      tabDragging = false;
+      tabPressTimer = setTimeout(() => {
+        tabPressTimer = null;
+        tabDragging = true;
+        startCatDrag(ci, tab, e.clientY);
+      }, 500);
+    }, { passive: true });
+    tab.addEventListener('touchmove', e => {
+      if (!tabDragging) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      moveFloatingCat(t.clientY);
+    }, { passive: false });
+    tab.addEventListener('touchend', e => {
+      if (tabDragging) { endCatDrag(e.changedTouches[0].clientY); tabDragging = false; return; }
+      if (tabPressTimer) { clearTimeout(tabPressTimer); tabPressTimer = null; toggleCollapse(ci); }
+    });
+    tab.addEventListener('touchcancel', () => {
+      clearTimeout(tabPressTimer); tabPressTimer = null;
+      if (tabDragging) { tabDragging = false; catDrag = null; catGhost.style.display = 'none'; document.querySelectorAll('.cat-wrapper').forEach(w => w.classList.remove('cat-dragging','cat-drag-above','cat-drag-below')); render(); }
+    });
+    tab.addEventListener('pointermove', e => {
+      if (!tabDragging) {
+        if (Math.abs(e.movementY) > 4) { clearTimeout(tabPressTimer); tabPressTimer = null; }
+        return;
+      }
+      moveFloatingCat(e.clientY);
+    });
+    tab.addEventListener('pointerup', e => {
+      if (tabDragging) { endCatDrag(e.clientY); tabDragging = false; return; }
+      if (tabPressTimer) { clearTimeout(tabPressTimer); tabPressTimer = null; toggleCollapse(ci); }
+    });
+    tab.addEventListener('pointercancel', () => {
+      clearTimeout(tabPressTimer); tabPressTimer = null;
+      if (tabDragging) { tabDragging = false; catDrag = null; catGhost.style.display = 'none'; document.querySelectorAll('.cat-wrapper').forEach(w => w.classList.remove('cat-dragging','cat-drag-above','cat-drag-below')); render(); }
+    });
+
+    const tabLabel = document.createElement('span');
+    tabLabel.className = 'cat-tab-label';
+    tabLabel.textContent = cat.name;
+    tab.appendChild(tabLabel);
+
+    // Count
+    const tabCount = document.createElement('span');
+    tabCount.className = 'cat-tab-count';
+    if (focusCol !== null) {
+      tabCount.textContent = (cat.cols[focusCol] || []).length;
+      tabCount.style.color = ['var(--green)', 'var(--orange)', 'var(--neutral)'][focusCol];
+    } else {
+      tabCount.textContent = cat.cols.reduce((s, c) => s + c.length, 0);
+    }
+    tab.appendChild(tabCount);
+
+    // Edit mode actions (delete + pencil)
+    const editActions = document.createElement('div');
+    editActions.className = 'cat-edit-actions';
+
+    const delBtn = document.createElement('div');
+    delBtn.className = 'cat-edit-del';
+    delBtn.textContent = '×';
+    delBtn.addEventListener('pointerdown', e => e.stopPropagation());
+    delBtn.addEventListener('click', e => { e.stopPropagation(); showCatDeleteConfirm(ci, tab); });
+
+    const pencilBtn = document.createElement('div');
+    pencilBtn.className = 'cat-edit-pencil';
+    pencilBtn.textContent = '✏️';
+    pencilBtn.addEventListener('pointerdown', e => e.stopPropagation());
+    pencilBtn.addEventListener('click', e => { e.stopPropagation(); openCatRename(ci, tabLabel); });
+
+    editActions.appendChild(delBtn);
+    editActions.appendChild(pencilBtn);
+    tab.appendChild(editActions);
+
+    const card = document.createElement('div');
+    card.className = 'category-card';
+
+    if (cat.collapsed && focusCol === null) { wrapper.appendChild(tab); wrapper.appendChild(card); board.appendChild(wrapper); return; }
+
+    const colsEl = document.createElement('div');
+    colsEl.className = 'cat-cols';
+
+    [0, 1, 2].forEach(ki => {
+      const colClass = ['regular', 'current', 'future'][ki];
+      const col = document.createElement('div');
+      col.className = `col ${colClass}`;
+      col.dataset.ci = ci; col.dataset.ki = ki;
+
+      // drag-over handled in chip pointermove
+
+      (cat.cols[ki] || []).forEach((item, ii) => {
+        const text = item.t;
+        const flag = item.f || null;
+
+        const chip = document.createElement('div');
+        chip.className = 'chip';
+        if (flag) chip.dataset.flag = flag;
+
+        // Flag icon
+        if (flag && FLAG_ICON[flag]) {
+          const iconEl = document.createElement('span');
+          iconEl.className = 'chip-flag';
+          iconEl.textContent = FLAG_ICON[flag];
+          chip.appendChild(iconEl);
+        }
+        const textEl = document.createElement('span');
+        textEl.className = 'chip-text';
+        textEl.textContent = text;
+        chip.appendChild(textEl);
+
+        chip.dataset.ci = ci;
+        chip.dataset.ki = ki;
+        chip.dataset.ii = ii;
+
+        // ── Tap → flag picker / Long press → drag ──
+        let isDragging = false;
+        let pressStartX = 0, pressStartY = 0;
+
+        // MOUSE
+        let pickerWasOpen = false;
+        chip.addEventListener('mousedown', e => {
+          if (e.button !== 0) return;
+          e.preventDefault();
+          pickerWasOpen = !!(activePicker && activePicker._chip === chip);
+          isDragging = false;
+          pressStartX = e.clientX; pressStartY = e.clientY;
+          clearTimeout(longPressTimer);
+          if (focusCol !== null) return;
+          longPressTimer = setTimeout(() => {
+            isDragging = true;
+            startDrag(ci, ki, ii, chip, text, e.clientX, e.clientY);
+          }, LONG_MS);
+        });
+        chip.addEventListener('mousemove', e => {
+          if (Math.abs(e.clientX - pressStartX) > 6 || Math.abs(e.clientY - pressStartY) > 6)
+            clearTimeout(longPressTimer);
+        });
+        let pendingPicker = null;
+        chip.addEventListener('mouseup', () => {
+          clearTimeout(longPressTimer);
+          if (drag) {
+            const over = document.querySelector('.col.drag-over');
+            if (over) endDrag(parseInt(over.dataset.ci), parseInt(over.dataset.ki));
+            else cancelDrag();
+            return;
+          }
+          if (isDragging) { isDragging = false; return; }
+          isDragging = false;
+          clearTimeout(pendingPicker);
+          if (pickerWasOpen) {
+            closeFlagPicker();
+          } else {
+            pendingPicker = setTimeout(() => {
+              const _ci = parseInt(chip.dataset.ci), _ki = parseInt(chip.dataset.ki), _ii = parseInt(chip.dataset.ii);
+              openFlagPicker(chip, _ci, _ki, _ii, data[_ci].cols[_ki][_ii]?.f || null, data[_ci].cols[_ki][_ii]?.t || '');
+            }, 0);
+          }
+        });
+
+        chip.addEventListener('dblclick', e => {
+          e.stopPropagation();
+          clearTimeout(pendingPicker);
+          closeFlagPicker();
+          openChipEdit(chip, ci, ki, ii);
+        });
+
+        // TOUCH
+        chip.addEventListener('touchstart', e => {
+          isDragging = false;
+          const t = e.touches[0];
+          pressStartX = t.clientX; pressStartY = t.clientY;
+          clearTimeout(longPressTimer);
+          if (focusCol !== null) return;
+          longPressTimer = setTimeout(() => {
+            isDragging = true;
+            startDrag(ci, ki, ii, chip, text, t.clientX, t.clientY);
+          }, LONG_MS);
+        }, { passive: true });
+
+        chip.addEventListener('touchmove', e => {
+          const t = e.touches[0];
+          const dx = Math.abs(t.clientX - pressStartX);
+          const dy = Math.abs(t.clientY - pressStartY);
+          if (dx > 6 || dy > 6) clearTimeout(longPressTimer);
+          if (!drag) return; // allow scroll if not dragging
+          e.preventDefault();
+          moveGhost(t.clientX, t.clientY);
+          clearDragOver();
+          const el = document.elementFromPoint(t.clientX, t.clientY);
+          const over = el && el.closest('.col');
+          if (over && parseInt(over.dataset.ci) === drag.ci) over.classList.add('drag-over');
+        }, { passive: false });
+
+        chip.addEventListener('touchend', e => {
+          clearTimeout(longPressTimer);
+          if (drag) {
+            const over = document.querySelector('.col.drag-over');
+            if (over) endDrag(parseInt(over.dataset.ci), parseInt(over.dataset.ki));
+            else cancelDrag();
+            return;
+          }
+          const t = e.changedTouches[0];
+          const dy = Math.abs(t.clientY - pressStartY);
+          if (!isDragging && dy < 8) {
+            const _ci = parseInt(chip.dataset.ci), _ki = parseInt(chip.dataset.ki), _ii = parseInt(chip.dataset.ii);
+            openFlagPicker(chip, _ci, _ki, _ii, data[_ci].cols[_ki][_ii]?.f || null, data[_ci].cols[_ki][_ii]?.t || '');
+          }
+          isDragging = false;
+        });
+
+        chip.addEventListener('touchcancel', () => { clearTimeout(longPressTimer); cancelDrag(); });
+
+        col.appendChild(chip);
+      });
+
+      // ── Add row (hidden in focus mode) ──
+      if (focusCol === null) {
+        const addRow = document.createElement('div');
+        addRow.className = 'add-row';
+        const addInp = document.createElement('input');
+        addInp.className = 'add-inp';
+        addInp.placeholder = '+';
+
+        const doneBtn = document.createElement('button');
+        doneBtn.className = 'add-done-btn';
+        doneBtn.textContent = 'סיום';
+        doneBtn.addEventListener('mousedown', e => e.preventDefault());
+        doneBtn.addEventListener('click', () => submitAdd(addInp, ci, ki));
+
+        addInp.addEventListener('paste', e => {
+          e.preventDefault();
+          const txt = (e.clipboardData || window.clipboardData).getData('text');
+          const lines = txt.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+          if (lines.length <= 1) { addInp.value = txt.trim(); return; }
+          lines.forEach(l => data[ci].cols[ki].push({ t: l, f: null }));
+          commit(`${lines.length} הרגלים נוספו`);
+        });
+        addInp.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); submitAdd(addInp, ci, ki); }
+        });
+        addInp.addEventListener('blur', () => submitAdd(addInp, ci, ki));
+
+        addRow.appendChild(addInp);
+        addRow.appendChild(doneBtn);
+        col.appendChild(addRow);
+      }
+      colsEl.appendChild(col);
+    });
+
+    card.appendChild(colsEl);
+    wrapper.appendChild(tab);
+    wrapper.appendChild(card);
+    board.appendChild(wrapper);
+  });
+
+  // Equalize all tab widths to the widest one
+  const tabs = board.querySelectorAll('.cat-tab');
+  let maxW = 0;
+  tabs.forEach(t => { t.style.width = 'auto'; maxW = Math.max(maxW, t.offsetWidth); });
+  tabs.forEach(t => { t.style.width = maxW + 'px'; });
+
+  // Sync legend header width
+  const hdr = document.getElementById('catLegendHeader');
+  if (hdr) {
+    if (maxW > 0) {
+      hdr.style.width = maxW + 'px';
+      hdr.style.visibility = 'visible';
+    } else {
+      hdr.style.visibility = 'hidden';
+      hdr.style.width = '0px';
+    }
+  }
+}
+
+function submitAdd(inp, ci, ki) {
+  const val = inp.value.trim();
+  if (!val) return;
+  data[ci].cols[ki].push({ t: val, f: null });
+  commit('הרגל נוסף');
+  inp.value = '';
+  setTimeout(() => {
+    const all = document.querySelectorAll(`.category-card:nth-child(${ci+1}) .add-inp`);
+    if (all[ki]) all[ki].focus();
+  }, 30);
+}
+
+function addCategory() {
+  const inp = document.getElementById('newCatInput');
+  const name = inp.value.trim();
+  if (!name) return;
+  data.push({ name, cols: [[], [], []] });
+  commit('קטגוריה נוספה'); inp.value = '';
+}
+
+document.getElementById('newCatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addCategory();
+});
+
+
+
+let _confirmPickerPos = { top: 0, chipCx: 0 };
+
+function showCatDeleteConfirm(ci, tabEl) {
+  document.getElementById('catDeletePicker')?.remove();
+  const rect = tabEl.getBoundingClientRect();
+  const picker = document.createElement('div');
+  picker.className = 'flag-picker delete-confirm-picker';
+  picker.id = 'catDeletePicker';
+  picker.innerHTML = `<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק קטגוריה</span></button>`;
+  picker.style.top  = '-9999px';
+  picker.style.left = '-9999px';
+  document.body.appendChild(picker);
+  const pw = picker.offsetWidth, ph = picker.offsetHeight;
+  let left = rect.left - pw - 6;
+  let top  = rect.top + rect.height / 2 - ph / 2;
+  if (left < 8) left = rect.right + 6;
+  top = Math.max(8, Math.min(top, window.innerHeight - ph - 8));
+  picker.style.top  = top  + 'px';
+  picker.style.left = left + 'px';
+  const onOutside = e => {
+    if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); }
+  };
+  setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 50);
+  picker.querySelector('.dp-ok').addEventListener('click', () => {
+    picker.remove(); document.removeEventListener('pointerdown', onOutside, true);
+    data.splice(ci, 1);
+    commit('קטגוריה נמחקה');
+  });
+}
+
+function showDeleteConfirm(habitText, onConfirm) {
+  document.getElementById('deletePicker')?.remove();
+
+  const picker = document.createElement('div');
+  picker.className = 'flag-picker delete-confirm-picker';
+  picker.id = 'deletePicker';
+  picker.innerHTML = `<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק</span></button>`;
+  picker.style.top = _confirmPickerPos.top + 'px';
+  picker.style.left = '-9999px'; // hidden until measured
+  document.body.appendChild(picker);
+
+  // center horizontally around chip center
+  const pw = picker.offsetWidth;
+  const left = Math.max(8, Math.min(_confirmPickerPos.chipCx - pw / 2, window.innerWidth - pw - 8));
+  picker.style.left = left + 'px';
+
+  const onOutside = e => {
+    if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); }
+  };
+  setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 50);
+
+  picker.querySelector('.dp-ok').addEventListener('click', () => {
+    picker.remove(); document.removeEventListener('pointerdown', onOutside, true);
+    onConfirm();
+  });
+}
+
+function showRedoDeleteConfirm(onConfirm) {
+  document.getElementById('redoConfirmPicker')?.remove();
+  const btn = document.getElementById('redoBtn');
+  const rect = btn.getBoundingClientRect();
+
+  const picker = document.createElement('div');
+  picker.className = 'flag-picker delete-confirm-picker';
+  picker.id = 'redoConfirmPicker';
+  picker.innerHTML = `<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק שוב</span></button>`;
+  picker.style.top  = '-9999px';
+  picker.style.left = '-9999px';
+  document.body.appendChild(picker);
+
+  const pw = picker.offsetWidth;
+  const ph = picker.offsetHeight;
+  let left = rect.left + rect.width / 2 - pw / 2;
+  let top  = rect.bottom + 6;
+  left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
+  if (top + ph > window.innerHeight) top = rect.top - ph - 6;
+  picker.style.top  = top  + 'px';
+  picker.style.left = left + 'px';
+
+  const onOutside = e => {
+    if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); }
+  };
+  setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 50);
+
+  picker.querySelector('.dp-ok').addEventListener('click', () => {
+    picker.remove(); document.removeEventListener('pointerdown', onOutside, true);
+    onConfirm();
+  });
+}
+
+// ── Focus mode ───────────────────────────────────────────────
+let focusCol = null;
+
+function setFocusCol(ki) {
+  const items = document.querySelectorAll('.col-legend-item');
+  if (focusCol === ki) {
+    focusCol = null;
+    document.body.classList.remove('focus-mode', 'focus-0', 'focus-1', 'focus-2');
+    items.forEach(el => el.classList.remove('active-focus', 'dimmed'));
+  } else {
+    focusCol = ki;
+    document.body.className = `focus-mode focus-${ki}`;
+    items.forEach((el, i) => {
+      el.classList.toggle('active-focus', i === ki);
+      el.classList.toggle('dimmed', i !== ki);
+    });
+  }
+  render();
+}
+
+document.querySelectorAll('.col-legend-item').forEach((el, i) => {
+  el.addEventListener('click', () => setFocusCol(i));
+});
+
+render();
 </script>
+
 </body>
 </html>
