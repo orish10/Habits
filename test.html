@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>לוח הרגלים</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  margin: 0; padding: 0;
+  -webkit-box-sizing: border-box; box-sizing: border-box;
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  font: inherit;
+}
+html {
+  background: #0e0e10;
+  min-height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  font-family: 'Heebo', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0e0e10;
+  color: #ffffff;
+  min-height: 100vh;
+  padding: 20px 14px 120px;
+  overflow-x: hidden;
+}
+button { background: none; border: none; cursor: pointer; padding: 0; }
+input  { background: none; border: none; outline: none; padding: 0; }
+
+/* ── Topbar ── */
+.topbar {
+max-width: 680px;
+margin: 0 auto 18px;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: space-between; justify-content: space-between;
+}
+h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #ffffff; }
+.undo-redo {
+display: -webkit-flex; display: flex;
+gap: 8px;
+position: absolute;
+left: 50%;
+-webkit-transform: translateX(-50%); transform: translateX(-50%);
+}
+.topbar { position: relative; }
+.ur-btn {
+background: #1c1c1e;
+border-radius: 50%;
+color: #8e8e93;
+font-size: 17px;
+width: 36px; height: 36px;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+-webkit-transition: background .15s, color .15s; transition: background .15s, color .15s;
+}
+.ur-btn:disabled { opacity: 0.25; }
+
+/* ── Legend row ── */
+.legends {
+max-width: 680px;
+margin: 0 auto 18px;
+display: -webkit-flex; display: flex;
+-webkit-flex-direction: column; flex-direction: column;
+gap: 8px;
+}
+.legends-row {
+display: -webkit-flex; display: flex;
+-webkit-flex-direction: row; flex-direction: row;
+-webkit-align-items: stretch; align-items: stretch;
+}
+.col-legend {
+display: -webkit-flex; display: flex;
+-webkit-flex: 1; flex: 1;
+-webkit-align-items: stretch; align-items: stretch;
+}
+.col-legend-item {
+-webkit-flex: 1; flex: 1;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+gap: 6px;
+padding: 7px 4px;
+border-radius: 0;
+font-size: 12px; font-weight: 700;
+cursor: pointer;
+}
+.col-legend-header {
+display: -webkit-flex; display: flex;
+-webkit-flex: 1; flex: 1;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+font-size: 11px; font-weight: 700;
+color: #636366;
+cursor: pointer;
+padding: 7px 4px;
+}
+.col-legend-header.edit-active { color: #ffffff; }
+.col-legend-item.regular { background: #1a3d28; color: #5ebd7e; border-radius: 100px; margin: 3px 2px; }
+.col-legend-item.current { background: #3d2a0e; color: #d4955a; border-radius: 100px; margin: 3px 2px; }
+.col-legend-item.future  { background: #222224; color: #8e8e93; border-radius: 100px; margin: 3px 2px; }
+.col-legend-item.active-focus { outline: 2px solid currentColor; }
+.col-legend-item.dimmed { opacity: 0.3; }
+.legend-dot { width: 7px; height: 7px; border-radius: 50%; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.regular .legend-dot { background: #5ebd7e; }
+.current .legend-dot { background: #d4955a; }
+.future  .legend-dot { background: #8e8e93; }
+
+/* ── Wrapper ── */
+.wrapper { max-width: 680px; margin: 0 auto; }
+
+/* ── Category wrapper ── */
+.cat-wrapper {
+display: -webkit-flex; display: flex;
+-webkit-flex-direction: row; flex-direction: row;
+-webkit-align-items: stretch; align-items: stretch;
+margin-bottom: 6px;
+border-radius: 18px;
+overflow: hidden;
+}
+.cat-tab {
+display: -webkit-flex; display: flex;
+-webkit-flex-direction: column; flex-direction: column;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+background: #2c2c2e;
+-webkit-flex: 1; flex: 1;
+-webkit-flex-shrink: 0; flex-shrink: 0;
+cursor: pointer;
+padding: 10px 4px;
+gap: 4px;
+min-width: 0;
+}
+.cat-tab-label {
+display: block;
+font-size: 11px; font-weight: 700;
+color: #636366;
+text-align: center;
+line-height: 1.3;
+word-break: break-all;
+overflow: hidden;
+max-height: 80px;
+}
+body.cat-edit-mode .cat-tab-label { display: none; }
+body.cat-edit-mode .cat-tab-count { display: none; }
+.cat-tab-count {
+font-size: 12px; font-weight: 700;
+color: #636366;
+}
+.cat-edit-actions {
+display: none;
+-webkit-flex-direction: column; flex-direction: column;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+gap: 6px;
+padding: 6px 0;
+}
+body.cat-edit-mode .col-legend-item { pointer-events: none; opacity: 0.35; }
+body.cat-edit-mode .cat-edit-actions { display: -webkit-flex; display: flex; }
+body.cat-edit-mode .chip,
+body.cat-edit-mode .add-row,
+body.cat-edit-mode .add-cat-bar { pointer-events: none; opacity: 0.35; }
+body.cat-edit-mode .cat-tab { pointer-events: auto; opacity: 1; }
+.cat-edit-del {
+width: 28px; height: 28px;
+border-radius: 50%;
+border: 2px solid #48484a;
+background: transparent;
+cursor: pointer;
+-webkit-box-sizing: border-box; box-sizing: border-box;
+-webkit-flex-shrink: 0; flex-shrink: 0;
+position: relative;
+}
+.cat-edit-del.cat-first { opacity: 0.2; pointer-events: none; }
+.cat-edit-del.cat-selected-check {
+background: #ff3b30;
+border-color: #ff3b30;
+}
+.cat-edit-del.cat-selected-check::after {
+content: ‘✓’;
+position: absolute;
+inset: 0;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+font-size: 13px; font-weight: 700;
+color: #fff;
+}
+.cat-edit-pencil {
+font-size: 14px; color: #aeaeb2;
+width: 28px; height: 28px;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+border-radius: 50%;
+background: #1c1c1e;
+cursor: pointer;
+}
+
+.cat-edit-overlay {
+display: none;
+position: absolute;
+inset: 0;
+background: rgba(0,0,0,0.3);
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+font-size: 14px; font-weight: 700;
+color: #ffffff;
+z-index: 5;
+border-radius: 0 18px 18px 0;
+pointer-events: none;
+}
+body.cat-edit-mode .cat-edit-overlay {
+display: -webkit-flex; display: flex;
+pointer-events: auto;
+cursor: text;
+}
+.cat-wrapper.cat-selected { outline: 2px solid rgba(255,59,48,0.5); }
+.cat-wrapper.cat-selected .cat-tab { background: rgba(255,59,48,0.22) !important; }
+.cat-wrapper.cat-selected .category-card { background: rgba(255,59,48,0.15) !important; }
+.cat-wrapper.cat-selected .cat-edit-overlay { background: transparent; }
+
+#cat-delete-bar {
+display: none;
+position: fixed;
+bottom: 0; left: 0; right: 0;
+background: #1c1c1e;
+border-top: 1px solid rgba(255,255,255,0.1);
+padding: 14px 20px 32px;
+font-family: ‘Heebo’, sans-serif;
+font-size: 14px; font-weight: 700;
+color: #ff3b30;
+text-align: center;
+cursor: pointer;
+z-index: 30000;
+}
+body.cat-edit-mode #cat-delete-bar { display: block; }
+#cat-delete-bar.no-selection { color: #636366; pointer-events: none; }
+/* ── Category card ── */
+.category-card {
+background: #1c1c1e;
+-webkit-flex: 3; flex: 3;
+min-width: 0;
+overflow: hidden;
+position: relative;
+}
+
+/* ── 3-col grid ── */
+.cat-cols {
+display: -webkit-flex; display: flex;
+width: 100%;
+}
+.col {
+-webkit-flex: 1; flex: 1;
+padding: 8px 7px 5px;
+border-left: 1px solid rgba(255,255,255,0.07);
+min-height: 40px;
+position: relative;
+min-width: 0;
+overflow: hidden;
+}
+.col:last-child { border-left: none; }
+.col.drag-over { background: rgba(255,255,255,0.04); }
+
+/* ── Chip ── */
+.chip {
+display: block;
+padding: 6px 8px;
+border-radius: 11px;
+font-size: 11.5px; font-weight: 500; line-height: 1.35;
+margin-bottom: 5px;
+word-break: break-word;
+cursor: default;
+position: relative;
+text-align: center;
+width: 100%;
+-webkit-box-sizing: border-box; box-sizing: border-box;
+}
+.col.regular .chip { background: #1a3d28; color: #5ebd7e; }
+.col.current .chip { background: #3d2a0e; color: #d4955a; }
+.col.future  .chip { background: #222224; color: #8e8e93; }
+
+.chip[data-flag=“focus”] {
+-webkit-box-shadow: 0 0 0 2.5px rgba(255,255,255,0.6) !important;
+box-shadow: 0 0 0 2.5px rgba(255,255,255,0.6) !important;
+}
+.chip[data-flag=“pause”] {
+background: rgba(40,40,42,0.5) !important;
+color: #6e6e73 !important;
+border: 1.5px dashed #48484a !important;
+}
+.chip[data-flag=“focus-pause”], .chip[data-flag=“pause-focus”] {
+-webkit-box-shadow: 0 0 0 2.5px rgba(255,255,255,0.6) !important;
+box-shadow: 0 0 0 2.5px rgba(255,255,255,0.6) !important;
+background: rgba(40,40,42,0.5) !important;
+color: #6e6e73 !important;
+border: 1.5px dashed #48484a !important;
+}.chip[data-flag=“urgent”] {
+background: rgba(255,59,48,0.2) !important;
+color: #ff3b30 !important;
+}
+.chip.dragging { opacity: 0.2; -webkit-transform: scale(0.94); transform: scale(0.94); }
+.chip-text { display: block; text-align: center; }
+
+/* ── Flag picker ── */
+.flag-picker {
+position: fixed;
+background: #2c2c2e;
+border-radius: 14px;
+padding: 6px;
+display: -webkit-flex; display: flex;
+gap: 4px;
+z-index: 10000;
+-webkit-box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+}
+.fp-btn {
+background: #1c1c1e;
+border-radius: 10px;
+padding: 10px;
+cursor: pointer;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+min-width: 44px; min-height: 44px;
+}
+.fp-btn.active { background: #3a3a3c; outline: 1.5px solid rgba(255,255,255,0.15); }
+.fp-btn.fp-danger .fp-icon { color: #ff3b30; }
+.fp-icon { font-size: 20px; color: #ffffff; }
+.fp-focus .fp-icon { font-size: 26px; }
+.fp-label { display: none; }
+
+.delete-confirm-picker { padding: 5px; }
+.delete-confirm-picker .fp-btn { min-width: 80px; -webkit-justify-content: center; justify-content: center; }
+.dp-delete-label { font-size: 15px; font-weight: 600; color: #ff3b30; font-family: ‘Heebo’, sans-serif; }
+
+/* ── Drag ghost ── */
+#drag-ghost {
+position: fixed; pointer-events: none;
+background: #2c2c2e; border-radius: 10px;
+padding: 7px 14px;
+font-family: ‘Heebo’, sans-serif; font-size: 13px; font-weight: 600; color: #fff;
+z-index: 9999; max-width: 200px; text-align: center;
+-webkit-box-shadow: 0 8px 30px rgba(0,0,0,0.7); box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+display: none;
+}
+#cat-drag-ghost { display: none; }
+
+/* ── Edit mode ── */
+.chip.editing { background: #2c2c2e !important; color: #fff !important; }
+.chip-input {
+background: none;
+font-family: ‘Heebo’, sans-serif; font-size: 12px; font-weight: 500;
+color: #fff; text-align: center;
+width: 100%; resize: none; overflow: hidden;
+-webkit-user-select: text; user-select: text;
+display: block;
+}
+
+/* ── Add row ── */
+.add-row {
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+gap: 4px;
+margin-top: 2px; padding: 2px;
+border-radius: 8px;
+}
+.add-row:focus-within { background: #2c2c2e; }
+.add-inp {
+-webkit-flex: 1; flex: 1;
+font-family: ‘Heebo’, sans-serif; font-size: 12px; color: #fff;
+padding: 4px 6px; min-width: 0;
+-webkit-user-select: text; user-select: text;
+}
+.add-inp::-webkit-input-placeholder { color: #3a3a3c; }
+.add-inp::placeholder { color: #3a3a3c; }
+.add-done-btn {
+display: none;
+background: #2c2c2e;
+border-radius: 7px;
+color: #8e8e93;
+font-family: ‘Heebo’, sans-serif;
+font-size: 11px; font-weight: 600; padding: 3px 8px;
+cursor: pointer; white-space: nowrap; -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+.add-row:focus-within .add-done-btn { display: block; }
+
+/* ── Add category ── */
+.add-cat-bar { display: -webkit-flex; display: flex; gap: 8px; margin-top: 6px; }
+.add-cat-inp {
+-webkit-flex: 1; flex: 1;
+background: #1c1c1e;
+border-radius: 14px;
+padding: 11px 16px; color: #fff;
+font-family: ‘Heebo’, sans-serif; font-size: 14px;
+-webkit-user-select: text; user-select: text;
+}
+.add-cat-inp::-webkit-input-placeholder { color: #3a3a3c; }
+.add-cat-inp::placeholder { color: #3a3a3c; }
+.add-cat-btn {
+background: #2c2c2e;
+border-radius: 14px;
+color: #8e8e93;
+font-family: ‘Heebo’, sans-serif;
+font-size: 14px; font-weight: 600; padding: 11px 18px;
+cursor: pointer;
+}
+
+/* ── Focus mode ── */
+body.focus-mode .add-row { display: none; }
+body.focus-mode .add-cat-bar { display: none; }
+body.focus-0 .col.current, body.focus-0 .col.future  { opacity: 0.25; pointer-events: none; }
+body.focus-1 .col.regular, body.focus-1 .col.future  { opacity: 0.25; pointer-events: none; }
+body.focus-2 .col.regular, body.focus-2 .col.current { opacity: 0.25; pointer-events: none; }
+
+@media (max-width: 480px) {
+.chip { font-size: 11px; padding: 5px 7px; }
+.col  { padding: 8px 7px 5px; }
+}
+
+/* ── Undo toast ── */
+#undo-toast {
+position: fixed;
+bottom: 28px; left: 50%;
+-webkit-transform: translateX(-50%) translateY(80px);
+transform: translateX(-50%) translateY(80px);
+background: #2c2c2e;
+border: 1px solid rgba(255,255,255,0.1);
+border-radius: 16px;
+padding: 10px 8px 10px 16px;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+gap: 10px;
+font-family: ‘Heebo’, sans-serif;
+font-size: 13px; font-weight: 500;
+color: #e0e0e0;
+white-space: nowrap;
+-webkit-box-shadow: 0 8px 32px rgba(0,0,0,0.6); box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+z-index: 20000;
+-webkit-transition: -webkit-transform 0.28s, opacity 0.28s;
+transition: transform 0.28s, opacity 0.28s;
+opacity: 0;
+pointer-events: none;
+}
+#undo-toast.show {
+-webkit-transform: translateX(-50%) translateY(0);
+transform: translateX(-50%) translateY(0);
+opacity: 1;
+pointer-events: all;
+}
+#undo-toast .toast-undo-btn {
+background: rgba(255,255,255,0.1);
+border-radius: 10px;
+color: #fff;
+font-family: ‘Heebo’, sans-serif;
+font-size: 13px; font-weight: 700;
+padding: 5px 12px;
+cursor: pointer;
+-webkit-flex-shrink: 0; flex-shrink: 0;
+}
+/* ── Select mode ── */
+.ur-btn.select-active { background: #3a3a3c; color: #fff; }
+body.select-mode .chip { cursor: pointer; padding-right: 28px; position: relative; }
+body.select-mode .chip::before {
+content: ‘’;
+position: absolute;
+right: 6px; top: 50%;
+-webkit-transform: translateY(-50%); transform: translateY(-50%);
+width: 18px; height: 18px;
+border-radius: 50%;
+border: 2px solid #636366;
+background: transparent;
+-webkit-box-sizing: border-box; box-sizing: border-box;
+}
+body.select-mode .chip.selected::before {
+background: #ff3b30;
+border-color: #ff3b30;
+}
+body.select-mode .chip.selected::after {
+content: ‘✓’;
+position: absolute;
+right: 6px; top: 50%;
+-webkit-transform: translateY(-50%); transform: translateY(-50%);
+width: 18px; height: 18px;
+line-height: 18px;
+text-align: center;
+font-size: 11px;
+font-weight: 700;
+color: #fff;
+}
+#bulk-bar {
+position: fixed;
+bottom: 0; left: 0; right: 0;
+background: #1c1c1e;
+border-top: 1px solid rgba(255,255,255,0.1);
+padding: 12px 16px 28px;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+gap: 8px;
+z-index: 30000;
+-webkit-transform: translateY(100%); transform: translateY(100%);
+-webkit-transition: transform 0.25s; transition: transform 0.25s;
+}
+#bulk-bar.show {
+-webkit-transform: translateY(0); transform: translateY(0);
+}
+#bulk-count {
+font-family: ‘Heebo’, sans-serif;
+font-size: 13px; font-weight: 600;
+color: #8e8e93;
+-webkit-flex-shrink: 0; flex-shrink: 0;
+min-width: 36px;
+}
+.bulk-btn {
+-webkit-flex: 1; flex: 1;
+background: #2c2c2e;
+border-radius: 12px;
+padding: 10px 6px;
+font-family: ‘Heebo’, sans-serif;
+font-size: 12px; font-weight: 600;
+color: #fff;
+text-align: center;
+cursor: pointer;
+}
+.bulk-btn.bulk-danger { color: #ff3b30; background: rgba(255,59,48,0.15); }
+.bulk-btn.bulk-move-sub {
+font-size: 11px;
+padding: 8px 4px;
+}
+#bulk-move-row {
+display: none;
+position: fixed;
+bottom: 0; left: 0; right: 0;
+background: #1c1c1e;
+border-top: 1px solid rgba(255,255,255,0.1);
+padding: 12px 16px 28px;
+gap: 8px;
+z-index: 30001;
+-webkit-transform: translateY(100%); transform: translateY(100%);
+-webkit-transition: transform 0.25s; transition: transform 0.25s;
+}
+#bulk-move-row.show {
+display: -webkit-flex; display: flex;
+-webkit-transform: translateY(0); transform: translateY(0);
+}
+</style>
+
+</head>
+<body>
+
+<div class="topbar">
+  <h1>הרגלים v62</h1>
+  <div class="undo-redo">
+    <button class="ur-btn" id="undoBtn" onclick="undo()" title="אחורה (Ctrl+Z)" disabled>↺</button>
+    <button class="ur-btn" id="redoBtn" onclick="redo()" title="קדימה (Ctrl+Y)" disabled>↻</button>
+    <button class="ur-btn" id="selectBtn" onclick="toggleSelectMode()" title="בחירה">☑</button>
+    <button class="ur-btn" onclick="exportData()" title="ייצוא">⬇</button>
+    <button class="ur-btn" onclick="window.location.href = window.location.href + '?t=' + Date.now()" title="רענון">⟳</button>
+  </div>
+</div>
+
+<div class="legends">
+  <div class="legends-row">
+    <div class="col-legend">
+      <div class="col-legend-header" id="catLegendHeader">קטגוריה</div>
+      <div class="col-legend-item regular"><div class="legend-dot"></div>ברגיל</div>
+      <div class="col-legend-item current"><div class="legend-dot"></div>בתהליך</div>
+      <div class="col-legend-item future"><div class="legend-dot"></div>לשפר בעתיד</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrapper">
+  <div id="board"></div>
+  <div class="add-cat-bar">
+    <input class="add-cat-inp" id="newCatInput" placeholder="+ קטגוריה חדשה..." />
+    <button class="add-cat-btn" onclick="addCategory()">הוסף</button>
+  </div>
+</div>
+
+<div id="cat-delete-bar" onclick="bulkDeleteCats()">מחק קטגוריות נבחרות</div>
+
+<div id="undo-toast">
+  <span id="toast-msg">בוצע</span>
+  <button class="toast-undo-btn" onclick="toastUndo()">ביטול</button>
+</div>
+<div id="drag-ghost"></div>
+<div id="cat-drag-ghost"></div>
+
+<!-- Bulk action bar -->
+
+<div id="bulk-bar">
+  <span id="bulk-count">0 נבחרו</span>
+  <div class="bulk-btn" onclick="bulkAction('focus')">הדגש</div>
+  <div class="bulk-btn" onclick="bulkAction('pause')">השהה</div>
+  <div class="bulk-btn bulk-danger" onclick="bulkAction('delete')">מחק</div>
+  <div class="bulk-btn" id="bulk-done" onclick="exitSelectMode()" style="background:#3a3a3c;color:#fff;display:none;">סיום</div>
+</div>
+
+<!-- Bulk move target row -->
+
+<div id="bulk-move-row">
+  <div class="bulk-btn bulk-move-sub" onclick="bulkMove(0)">● ברגיל</div>
+  <div class="bulk-btn bulk-move-sub" onclick="bulkMove(1)">● בתהליך</div>
+  <div class="bulk-btn bulk-move-sub" onclick="bulkMove(2)">● לשפר</div>
+  <div class="bulk-btn" onclick="hideMoveRow()">ביטול</div>
+</div>
+
+<script>
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// ── Flag cycle: null → focus → urgent → pause → null ────────
+const FLAG_CYCLE = [null, 'focus', 'urgent', 'pause'];
+const FLAG_ICON  = {};
+
+// ── Default data ─────────────────────────────────────────────
+// Each item: { t: "text", f: null|"urgent"|"focus"|"pause" }
+function mkItems(arr) { return arr.map(t => ({ t, f: null })); }
+
+const DEFAULT = [];
+
+// ── Migrate old string-based saves ──────────────────────────
+let _keyCounter = 0;
+function newKey() { return 'k' + (++_keyCounter); }
+
+function migrate(d) {
+  d.forEach(cat => {
+    cat.cols = cat.cols.map(col =>
+      col.map(item => {
+        if (typeof item === 'string') item = { t: item, f: null };
+        if (!item._key) item._key = newKey();
+        return item;
+      })
+    );
+  });
+  return d;
+}
+
+// ── History ──────────────────────────────────────────────────
+const MAX_HIST = 80;
+let history = [], histIdx = -1;
+
+function snapshot() {
+  history = history.slice(0, histIdx + 1);
+  history.push(JSON.parse(JSON.stringify(data)));
+  if (history.length > MAX_HIST) history.shift();
+  histIdx = history.length - 1;
+  updateUR();
+}
+function undo() {
+  if (histIdx <= 0) return;
+  histIdx--;
+  data = JSON.parse(JSON.stringify(history[histIdx]));
+  persist(); render(); updateUR();
+}
+function redo() {
+  if (histIdx >= history.length - 1) return;
+  // check if the state we're redoing INTO is a delete relative to current
+  const next = history[histIdx + 1];
+  const curr = history[histIdx];
+  const nextCount = next.reduce((s, c) => s + c.cols.reduce((a, col) => a + col.length, 0), 0);
+  const currCount = curr.reduce((s, c) => s + c.cols.reduce((a, col) => a + col.length, 0), 0);
+  if (nextCount < currCount) {
+    showRedoDeleteConfirm(() => { histIdx++; data = JSON.parse(JSON.stringify(history[histIdx])); persist(); render(); updateUR(); });
+  } else {
+    histIdx++;
+    data = JSON.parse(JSON.stringify(history[histIdx]));
+    persist(); render(); updateUR();
+  }
+}
+function updateUR() {
+  document.getElementById('undoBtn').disabled = histIdx <= 0;
+  document.getElementById('redoBtn').disabled = histIdx >= history.length - 1;
+}
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey) && e.key==='z' && !e.shiftKey) { e.preventDefault(); undo(); }
+  if ((e.ctrlKey||e.metaKey) && (e.key==='y'||(e.key==='z'&&e.shiftKey))) { e.preventDefault(); redo(); }
+});
+
+// ── Persistence ──────────────────────────────────────────────
+function persist() {
+  try {
+    const json = JSON.stringify(data);
+    localStorage.setItem('hb8', json);
+    localStorage.setItem('hb8_ts', Date.now()); // verify write succeeded
+  } catch(e) {
+    console.warn('persist failed', e);
+  }
+}
+function load() {
+  try {
+    const raw = localStorage.getItem('hb8');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      console.log('loaded from localStorage, categories:', parsed.length);
+      return parsed;
+    }
+  } catch(e) { console.warn('load failed', e); }
+  console.log('no saved data');
+  return null;
+}
+
+// Save on page hide (iOS reliable)
+window.addEventListener('pagehide', () => { try { localStorage.setItem('hb8', JSON.stringify(data)); } catch(e) {} });
+window.addEventListener('beforeunload', () => { try { localStorage.setItem('hb8', JSON.stringify(data)); } catch(e) {} });
+
+let raw = load();
+let data = raw ? migrate(raw) : JSON.parse(JSON.stringify(DEFAULT));
+history = [JSON.parse(JSON.stringify(data))];
+histIdx = 0; updateUR();
+
+function compact(d) {
+  d.forEach(cat => {
+    cat.cols = cat.cols.map(col => col.filter(item => item && item.t && item.t.trim()));
+  });
+}
+
+function toggleCollapse(ci) {
+  data[ci].collapsed = !data[ci].collapsed;
+  persist(); render();
+}
+
+// ── Toast ─────────────────────────────────────────────────────
+let toastTimer = null;
+
+function showToast(msg) {
+  const toast = document.getElementById('undo-toast');
+  document.getElementById('toast-msg').textContent = msg;
+  clearTimeout(toastTimer);
+  toast.classList.add('show');
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+function toastUndo() {
+  document.getElementById('undo-toast').classList.remove('show');
+  clearTimeout(toastTimer);
+  undo();
+}
+
+function commit(msg) {
+  compact(data); persist(); snapshot(); render();
+  showToast(msg || 'בוצע');
+}
+
+// ── Flag picker ──────────────────────────────────────────────
+let activePicker = null;
+
+function handlePickerAction(opt, ci, ki, ii, isFocused, isPaused, habitText) {
+  if (opt.flag === 'delete') {
+    const _ci = ci, _ki = ki, _ii = ii;
+    closeFlagPicker();
+    setTimeout(() => {
+      showDeleteConfirm(habitText, () => {
+        data[_ci].cols[_ki].splice(_ii, 1);
+        commit('הרגל נמחק');
+      });
+    }, 50);
+  } else if (opt.flag === 'pause') {
+    data[ci].cols[ki][ii].f = 'pause';
+    commit('הרגל הושהה'); closeFlagPicker();
+  } else if (opt.flag === 'unpause') {
+    data[ci].cols[ki][ii].f = null;
+    commit('הרגל חודש'); closeFlagPicker();
+  } else if (opt.flag === 'focus') {
+    data[ci].cols[ki][ii].f = 'focus';
+    commit('סומן כמודגש'); closeFlagPicker();
+  } else if (opt.flag === 'unfocus') {
+    data[ci].cols[ki][ii].f = null;
+    commit('הדגשה הוסרה'); closeFlagPicker();
+  } else {
+    data[ci].cols[ki][ii].f = opt.flag;
+    commit('בוצע'); closeFlagPicker();
+  }
+}
+
+function openFlagPicker(chip, ci, ki, ii, currentFlag, habitText) {
+  closeFlagPicker();
+
+  const picker = document.createElement('div');
+  picker.className = 'flag-picker';
+  picker.id = 'flagPicker';
+
+  const isFocused = currentFlag === 'focus' || currentFlag === 'focus-pause';
+  const isPaused  = currentFlag === 'pause'  || currentFlag === 'focus-pause';
+
+  const options = [
+    isFocused
+      ? { flag: 'unfocus', icon: '✕',  label: 'הסר הדגשה', skip: false }
+      : { flag: 'focus',   icon: '*',  label: 'מודגש', cls: 'fp-focus', skip: false },
+    isPaused
+      ? { flag: 'unpause', icon: '▶',  label: 'המשך',       skip: false }
+      : { flag: 'pause',   icon: '⏸', label: 'מושהה',      skip: false },
+    { flag: 'delete', icon: '⊗', label: 'מחק', skip: false, danger: true },
+  ];
+
+  options.filter(opt => !opt.skip).forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'fp-btn' + (opt.danger ? ' fp-danger' : '') + (opt.cls ? ' ' + opt.cls : '');
+    btn.innerHTML = `<span class="fp-icon">${opt.icon}</span><span class="fp-label">${opt.label}</span>`;
+    btn.addEventListener('mousedown', e => e.preventDefault());
+    btn.addEventListener('click', () => {
+      handlePickerAction(opt, ci, ki, ii, isFocused, isPaused, habitText);
+    });
+    btn.addEventListener('touchend', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      handlePickerAction(opt, ci, ki, ii, isFocused, isPaused, habitText);
+    });
+    picker.appendChild(btn);
+  });
+
+  document.body.appendChild(picker);
+  activePicker = picker;
+  activePicker._chip = chip;
+
+  const rect = chip.getBoundingClientRect();
+  const pw = picker.offsetWidth;
+  const ph = picker.offsetHeight;
+
+  // position:fixed uses viewport coords — no scrollY needed
+  let left = rect.left + rect.width / 2 - pw / 2;
+  let top  = rect.bottom + 4;
+
+  left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
+  if (rect.bottom + 4 + ph > window.innerHeight) top = rect.top - ph - 4;
+
+  picker.style.top  = top + 'px';
+  picker.style.left = left + 'px';
+  _confirmPickerPos = { top, chipCx: rect.left + rect.width / 2 };
+}
+
+function openChipEdit(chip, ci, ki, ii) {
+  const text = data[ci].cols[ki][ii].t;
+  chip.classList.add('editing');
+  chip.innerHTML = '';
+  const inp = document.createElement('textarea');
+  inp.className = 'chip-input';
+  inp.value = text;
+  inp.rows = 1;
+  chip.appendChild(inp);
+  // Allow text selection inside input
+  inp.style.webkitUserSelect = 'text';
+  inp.style.userSelect = 'text';
+  inp.focus(); inp.select();
+  const finish = () => {
+    const val = inp.value.trim();
+    if (!val) { data[ci].cols[ki].splice(ii, 1); commit('הרגל נמחק'); }
+    else      { data[ci].cols[ki][ii].t = val;   commit('הרגל עודכן'); }
+  };
+  inp.addEventListener('blur', finish);
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); inp.blur(); }
+    if (e.key === 'Escape') { inp.value = text; inp.blur(); }
+  });
+}
+
+function closeFlagPicker() {
+  if (activePicker) { activePicker.remove(); activePicker = null; }
+}
+
+document.addEventListener('pointerdown', e => {
+  if (activePicker && !activePicker.contains(e.target)) closeFlagPicker();
+});
+
+// ── Drag ─────────────────────────────────────────────────────
+let drag = null, longPressTimer = null;
+const LONG_MS = 480;
+const ghost   = document.getElementById('drag-ghost');
+
+function startDrag(ci, ki, ii, el, text, x, y) {
+  closeFlagPicker();
+  drag = { ci, ki, ii, el };
+  el.classList.add('dragging');
+  ghost.textContent = text;
+  ghost.style.display = 'block';
+  moveGhost(x, y);
+}
+function moveGhost(x, y) {
+  ghost.style.left = (x - ghost.offsetWidth / 2) + 'px';
+  ghost.style.top  = (y - 50) + 'px';
+}
+function endDrag(tci, tki) {
+  if (!drag) return;
+  const { ci, ki, ii, el } = drag;
+  el.classList.remove('dragging');
+  ghost.style.display = 'none';
+  clearDragOver();
+
+  if (tci !== null && tci === ci && tki !== ki) {
+    const draggedKey = data[ci].cols[ki][ii]?._key;
+    const isDraggedSelected = draggedKey && selected.includes(draggedKey);
+    if (selectMode && isDraggedSelected && selected.length > 1) {
+      const resolved = selected.map(k => findItem(k)).filter(Boolean).filter(item => item.ci === ci);
+      const sorted = resolved.sort((a,b) => b.ki-a.ki || b.ii-a.ii);
+      sorted.forEach(({ci:c, ki:k, ii:i}) => {
+        const item = data[c].cols[k].splice(i, 1)[0];
+        data[c].cols[tki].push(item);
+      });
+      commit(resolved.length + ' הרגלים הועברו');
+      document.getElementById('bulk-done').style.display = 'block';
+    } else {
+      const item = data[ci].cols[ki].splice(ii, 1)[0];
+      data[ci].cols[tki].push(item);
+      commit('הרגל הועבר');
+    }
+  }
+  drag = null;
+}
+
+// ── Auto-scroll during drag ───────────────────────────────────
+let autoScrollTimer = null;
+function stopAutoScroll() { clearInterval(autoScrollTimer); autoScrollTimer = null; }
+function startAutoScroll(dir) {
+  if (autoScrollTimer) return;
+  autoScrollTimer = setInterval(() => { window.scrollBy(0, dir * 8); }, 16);
+}
+function checkAutoScroll(y) {
+  const threshold = 80;
+  if (y < threshold) startAutoScroll(-1);
+  else if (y > window.innerHeight - threshold) startAutoScroll(1);
+  else stopAutoScroll();
+}
+function cancelDrag() {
+  if (!drag) return;
+  drag.el.classList.remove('dragging');
+  ghost.style.display = 'none';
+  drag = null;
+  clearDragOver();
+}
+function clearDragOver() {
+  document.querySelectorAll('.col.drag-over').forEach(c => c.classList.remove('drag-over'));
+}
+
+document.addEventListener('mousemove', e => { if (drag) { moveGhost(e.clientX, e.clientY); clearDragOver(); const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('.col'); if (over && parseInt(over.dataset.ci) === drag.ci) over.classList.add('drag-over'); } });
+document.addEventListener('mouseup',   () => { clearTimeout(longPressTimer); if (drag) cancelDrag(); });
+
+// ── Category edit mode ───────────────────────────────────────
+let catEditMode = false;
+let selectedCats = new Set();
+
+const catLegendHeader = document.getElementById('catLegendHeader');
+catLegendHeader.addEventListener('click', () => {
+  catEditMode = !catEditMode;
+  if (!catEditMode) selectedCats.clear();
+  document.body.classList.toggle('cat-edit-mode', catEditMode);
+  catLegendHeader.classList.toggle('edit-active', catEditMode);
+  updateCatDeleteBar();
+  render();
+});
+
+function updateCatDeleteBar() {
+  const bar = document.getElementById('cat-delete-bar');
+  if (!bar) return;
+  if (selectedCats.size > 0) {
+    bar.textContent = `מחק ${selectedCats.size} קטגוריות נבחרות`;
+    bar.classList.remove('no-selection');
+  } else {
+    bar.textContent = 'מחק קטגוריות נבחרות';
+    bar.classList.add('no-selection');
+  }
+}
+
+function toggleCatSelect(ci) {
+  const key = data[ci].name + '_' + ci;
+  if (selectedCats.has(ci)) selectedCats.delete(ci);
+  else selectedCats.add(ci);
+  updateCatDeleteBar();
+  render();
+}
+
+function bulkDeleteCats() {
+  if (selectedCats.size === 0) return;
+  const sorted = Array.from(selectedCats).sort((a,b) => b - a);
+  sorted.forEach(ci => data.splice(ci, 1));
+  selectedCats.clear();
+  commit(sorted.length + ' קטגוריות נמחקו');
+  updateCatDeleteBar();
+}
+
+function openCatRename(ci, overlayEl) {
+  const inp = document.createElement('input');
+  inp.value = data[ci].name;
+  inp.style.cssText = `background:none;border:none;outline:none;font-family:Heebo,sans-serif;font-size:14px;font-weight:700;color:#fff;text-align:center;width:90%;-webkit-user-select:text;user-select:text;border-bottom:1.5px solid rgba(255,255,255,0.4);`;
+  overlayEl.textContent = '';
+  overlayEl.appendChild(inp);
+  inp.focus(); inp.select();
+  const finish = () => {
+    const v = inp.value.trim();
+    if (v && v !== data[ci].name) { data[ci].name = v; commit('שם קטגוריה עודכן'); }
+    else render();
+  };
+  inp.addEventListener('blur', finish);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); if (e.key === 'Escape') { inp.value = data[ci].name; inp.blur(); } });
+}
+
+// ── Category drag (sorting) ──────────────────────────────────
+let catDrag = null;
+const catGhost = document.getElementById('cat-drag-ghost');
+
+// insert-line indicator
+const catInsertLine = document.createElement('div');
+catInsertLine.style.cssText = `
+  position:fixed; left:0; right:0; height:3px;
+  background: rgba(255,255,255,0.7);
+  border-radius:2px; z-index:9997; pointer-events:none;
+  display:none;
+  box-shadow: 0 0 8px rgba(255,255,255,0.4);
+`;
+document.body.appendChild(catInsertLine);
+
+function startCatDrag(ci, tabEl, startY) {
+  const wrappers = Array.from(document.querySelectorAll('.cat-wrapper'));
+  const el = wrappers[ci];
+  const rect = el.getBoundingClientRect();
+
+  // snapshot original positions
+  const origRects = wrappers.map(w => w.getBoundingClientRect());
+
+  // make dragged element fixed
+  el.style.cssText += `
+    position:fixed;
+    top:${rect.top}px; left:${rect.left}px;
+    width:${rect.width}px;
+    z-index:9999;
+    box-shadow:0 12px 40px rgba(0,0,0,0.8);
+    opacity:0.97;
+    transition:none;
+    pointer-events:none;
+    margin:0;
+  `;
+
+  // placeholder to keep space
+  const placeholder = document.createElement('div');
+  placeholder.style.cssText = `height:${rect.height}px; margin-bottom:6px; flex-shrink:0;`;
+  el.parentNode.insertBefore(placeholder, el);
+
+  catDrag = { ci, el, placeholder, origRects, startY, fixedTop: rect.top, insertIdx: ci };
+  moveFloatingCat(startY);
+}
+
+function moveFloatingCat(y) {
+  if (!catDrag) return;
+  const { el, origRects, ci, startY, fixedTop } = catDrag;
+
+  // move dragged element
+  const newTop = fixedTop + (y - startY);
+  el.style.top = newTop + 'px';
+  const centerY = newTop + origRects[ci].height / 2;
+
+  // find insert index using ORIGINAL rects (before any transforms)
+  // imagine all items in original positions, where does centerY fall?
+  let insertIdx = 0;
+  for (let i = 0; i < origRects.length; i++) {
+    if (i === ci) continue;
+    const mid = origRects[i].top + origRects[i].height / 2;
+    if (centerY > mid) {
+      insertIdx = i >= ci ? i : i;
+    }
+  }
+  // if centerY is above everything, insertIdx stays 0 unless ci=0
+  // recalculate cleanly: find first item whose mid is above centerY
+  insertIdx = ci; // default: no move
+  let found = false;
+  // build list of indices excluding ci
+  const others = origRects.map((r, i) => i).filter(i => i !== ci);
+  for (let j = 0; j < others.length; j++) {
+    const i = others[j];
+    const mid = origRects[i].top + origRects[i].height / 2;
+    if (centerY <= mid) {
+      // insert before i
+      insertIdx = i > ci ? i - 1 : i;
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    // below everything
+    insertIdx = origRects.length - 1;
+  }
+  insertIdx = Math.max(0, Math.min(data.length - 1, insertIdx));
+  catDrag.insertIdx = insertIdx;
+
+  // shift other wrappers
+  const wrappers = Array.from(document.querySelectorAll('.cat-wrapper'));
+  const dragH = origRects[ci].height + 6;
+  wrappers.forEach((w, i) => {
+    if (i === ci) return;
+    let shift = 0;
+    if (ci < insertIdx && i > ci && i <= insertIdx) shift = -dragH;
+    if (ci > insertIdx && i >= insertIdx && i < ci) shift = dragH;
+    w.style.transform = `translateY(${shift}px)`;
+    w.style.transition = 'transform 0.18s ease';
+  });
+
+  // insert line
+  if (insertIdx === ci) { catInsertLine.style.display = 'none'; return; }
+  let lineY;
+  if (insertIdx < ci) {
+    lineY = origRects[insertIdx].top;
+  } else {
+    lineY = origRects[insertIdx].bottom + 3;
+  }
+  catInsertLine.style.display = 'block';
+  catInsertLine.style.top = lineY + 'px';
+}
+
+function endCatDrag(y) {
+  if (!catDrag) return;
+  const { el, placeholder, ci, insertIdx } = catDrag;
+
+  // cleanup
+  catInsertLine.style.display = 'none';
+  el.style.cssText = '';
+  placeholder.remove();
+  document.querySelectorAll('.cat-wrapper').forEach(w => {
+    w.style.transform = '';
+    w.style.transition = '';
+  });
+
+  catDrag = null;
+
+  if (insertIdx !== ci) {
+    const [item] = data.splice(ci, 1);
+    data.splice(insertIdx, 0, item);
+    commit('קטגוריה הוזזה');
+  } else {
+    render();
+  }
+}
+
+// ── Render ───────────────────────────────────────────────────
+function render() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+
+  data.forEach((cat, ci) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'cat-wrapper';
+
+    // Side tab with category name + dynamic count
+    const tab = document.createElement('div');
+    tab.className = 'cat-tab';
+    tab.dataset.ci = ci;
+
+    // Long press → drag (for sorting), short press → collapse
+    let tabPressTimer = null, tabDragging = false;
+    tab.addEventListener('pointerdown', e => {
+      if (catEditMode) return;
+      tabDragging = false;
+      tabPressTimer = setTimeout(() => {
+        tabPressTimer = null;
+        tabDragging = true;
+        startCatDrag(ci, tab, e.clientY);
+      }, 500);
+    }, { passive: true });
+    tab.addEventListener('touchmove', e => {
+      if (!tabDragging) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      moveFloatingCat(t.clientY);
+    }, { passive: false });
+    tab.addEventListener('touchend', e => {
+      if (tabDragging) { endCatDrag(e.changedTouches[0].clientY); tabDragging = false; return; }
+      if (tabPressTimer) { clearTimeout(tabPressTimer); tabPressTimer = null; toggleCollapse(ci); }
+    });
+    tab.addEventListener('touchcancel', () => {
+      clearTimeout(tabPressTimer); tabPressTimer = null;
+      if (tabDragging) { tabDragging = false; catDrag = null; catGhost.style.display = 'none'; document.querySelectorAll('.cat-wrapper').forEach(w => w.classList.remove('cat-dragging','cat-drag-above','cat-drag-below')); render(); }
+    });
+    tab.addEventListener('pointermove', e => {
+      if (!tabDragging) {
+        if (Math.abs(e.movementY) > 4) { clearTimeout(tabPressTimer); tabPressTimer = null; }
+        return;
+      }
+      moveFloatingCat(e.clientY);
+    });
+    tab.addEventListener('pointerup', e => {
+      if (tabDragging) { endCatDrag(e.clientY); tabDragging = false; return; }
+      if (tabPressTimer) { clearTimeout(tabPressTimer); tabPressTimer = null; toggleCollapse(ci); }
+    });
+    tab.addEventListener('pointercancel', () => {
+      clearTimeout(tabPressTimer); tabPressTimer = null;
+      if (tabDragging) { tabDragging = false; catDrag = null; catGhost.style.display = 'none'; document.querySelectorAll('.cat-wrapper').forEach(w => w.classList.remove('cat-dragging','cat-drag-above','cat-drag-below')); render(); }
+    });
+
+    const tabLabel = document.createElement('span');
+    tabLabel.className = 'cat-tab-label';
+    tabLabel.textContent = cat.name.length > 8 ? cat.name.slice(0, 8) + '…' : cat.name;
+    tab.appendChild(tabLabel);
+
+    // Count
+    const tabCount = document.createElement('span');
+    tabCount.className = 'cat-tab-count';
+    if (focusCol !== null) {
+      tabCount.textContent = (cat.cols[focusCol] || []).length;
+      tabCount.style.color = ['#5ebd7e', '#d4955a', '#8e8e93'][focusCol];
+    } else {
+      tabCount.textContent = cat.cols.reduce((s, c) => s + c.length, 0);
+    }
+    tab.appendChild(tabCount);
+
+    // Edit mode actions (delete only)
+    const editActions = document.createElement('div');
+    editActions.className = 'cat-edit-actions';
+
+    const delBtn = document.createElement('div');
+    delBtn.className = 'cat-edit-del';
+    delBtn.classList.toggle('cat-selected-check', selectedCats.has(ci));
+    delBtn.addEventListener('pointerdown', e => e.stopPropagation());
+    delBtn.addEventListener('click', e => { e.stopPropagation(); toggleCatSelect(ci); });
+    delBtn.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); toggleCatSelect(ci); });
+
+    editActions.appendChild(delBtn);
+    tab.appendChild(editActions);
+
+    const card = document.createElement('div');
+    card.className = 'category-card';
+
+    // Overlay shown in edit mode
+    const overlay = document.createElement('div');
+    overlay.className = 'cat-edit-overlay';
+    overlay.textContent = cat.name;
+
+    // Double click to rename
+    overlay.addEventListener('dblclick', e => { e.stopPropagation(); openCatRename(ci, overlay); });
+
+    // Double tap to rename on touch
+    let lastTap = 0;
+    overlay.addEventListener('touchend', e => {
+      if (!catEditMode) return;
+      const now = Date.now();
+      if (now - lastTap < 350) { e.preventDefault(); openCatRename(ci, overlay); }
+      lastTap = now;
+    });
+
+    card.appendChild(overlay);
+
+    if (cat.collapsed && focusCol === null) {
+      card.style.position = 'relative';
+      card.style.minHeight = '44px';
+      card.style.cursor = 'pointer';
+      const chevron = document.createElement('div');
+      chevron.style.cssText = 'position:absolute;inset:0;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;font-size:32px;color:#636366;pointer-events:none;line-height:1;padding-top:4px;';
+      chevron.textContent = '⌄';
+      card.appendChild(chevron);
+      card.addEventListener('click', () => toggleCollapse(ci));
+      card.addEventListener('touchend', e => { e.preventDefault(); toggleCollapse(ci); });
+      wrapper.appendChild(tab); wrapper.appendChild(card); board.appendChild(wrapper); return;
+    }
+
+    const colsEl = document.createElement('div');
+    colsEl.className = 'cat-cols';
+
+    [0, 1, 2].forEach(ki => {
+      const colClass = ['regular', 'current', 'future'][ki];
+      const col = document.createElement('div');
+      col.className = `col ${colClass}`;
+      col.dataset.ci = ci; col.dataset.ki = ki;
+
+      // drag-over handled in chip pointermove
+
+      (cat.cols[ki] || []).forEach((item, ii) => {
+        const text = item.t;
+        const flag = item.f || null;
+
+        const chip = document.createElement('div');
+        chip.className = 'chip';
+        if (flag) chip.dataset.flag = flag;
+
+        // Apply flag styles inline for Safari
+        if (flag === 'focus') {
+          chip.style.webkitBoxShadow = '0 0 0 2.5px rgba(255,255,255,0.6)';
+          chip.style.boxShadow = '0 0 0 2.5px rgba(255,255,255,0.6)';
+        } else if (flag === 'pause') {
+          chip.style.background = '#28282a';
+          chip.style.color = '#6e6e73';
+          chip.style.border = '1.5px dashed #48484a';
+        } else if (flag === 'urgent') {
+          chip.style.background = 'rgba(255,59,48,0.2)';
+          chip.style.color = '#ff3b30';
+        }
+
+        // Flag icon
+        if (flag && FLAG_ICON[flag]) {
+          const iconEl = document.createElement('span');
+          iconEl.className = 'chip-flag';
+          iconEl.textContent = FLAG_ICON[flag];
+          chip.appendChild(iconEl);
+        }
+        const textEl = document.createElement('span');
+        textEl.className = 'chip-text';
+        textEl.textContent = text;
+        chip.appendChild(textEl);
+
+        chip.dataset.ci = ci;
+        chip.dataset.ki = ki;
+        chip.dataset.ii = ii;
+
+        // Mark selected in select mode
+        if (selectMode && item._key && selected.includes(item._key)) {
+          chip.classList.add('selected');
+        }
+
+        // ── Tap → flag picker / Long press → drag ──
+        let isDragging = false;
+        let pressStartX = 0, pressStartY = 0;
+
+        // MOUSE
+        let pickerWasOpen = false;
+        chip.addEventListener('mousedown', e => {
+          if (e.button !== 0) return;
+          e.preventDefault();
+          pickerWasOpen = !!(activePicker && activePicker._chip === chip);
+          isDragging = false;
+          pressStartX = e.clientX; pressStartY = e.clientY;
+          clearTimeout(longPressTimer);
+          if (focusCol !== null) return;
+          longPressTimer = setTimeout(() => {
+            isDragging = true;
+            startDrag(ci, ki, ii, chip, text, e.clientX, e.clientY);
+          }, LONG_MS);
+        });
+        chip.addEventListener('mousemove', e => {
+          if (Math.abs(e.clientX - pressStartX) > 6 || Math.abs(e.clientY - pressStartY) > 6)
+            clearTimeout(longPressTimer);
+        });
+        let pendingPicker = null;
+        chip.addEventListener('mouseup', () => {
+          clearTimeout(longPressTimer);
+          if (drag) {
+            const over = document.querySelector('.col.drag-over');
+            if (over) endDrag(parseInt(over.dataset.ci), parseInt(over.dataset.ki));
+            else cancelDrag();
+            return;
+          }
+          if (isDragging) { isDragging = false; return; }
+          isDragging = false;
+          clearTimeout(pendingPicker);
+          if (pickerWasOpen) {
+            closeFlagPicker();
+          } else {
+            pendingPicker = setTimeout(() => {
+              const _ci = parseInt(chip.dataset.ci), _ki = parseInt(chip.dataset.ki), _ii = parseInt(chip.dataset.ii);
+              openFlagPicker(chip, _ci, _ki, _ii, data[_ci].cols[_ki][_ii]?.f || null, data[_ci].cols[_ki][_ii]?.t || '');
+            }, 0);
+          }
+        });
+
+        chip.addEventListener('dblclick', e => {
+          e.stopPropagation();
+          clearTimeout(pendingPicker);
+          closeFlagPicker();
+          openChipEdit(chip, ci, ki, ii);
+        });
+
+        // TOUCH
+        chip.addEventListener('touchstart', e => {
+          isDragging = false;
+          const t = e.touches[0];
+          pressStartX = t.clientX; pressStartY = t.clientY;
+          clearTimeout(longPressTimer);
+          if (focusCol !== null) return;
+          longPressTimer = setTimeout(() => {
+            isDragging = true;
+            startDrag(ci, ki, ii, chip, text, t.clientX, t.clientY);
+          }, LONG_MS);
+        }, { passive: true });
+
+        chip.addEventListener('touchmove', e => {
+          const t = e.touches[0];
+          const dx = Math.abs(t.clientX - pressStartX);
+          const dy = Math.abs(t.clientY - pressStartY);
+          if (dx > 6 || dy > 6) clearTimeout(longPressTimer);
+          if (!drag) return;
+          e.preventDefault();
+          moveGhost(t.clientX, t.clientY);
+          clearDragOver();
+          const el = document.elementFromPoint(t.clientX, t.clientY);
+          const over = el && el.closest('.col');
+          if (over && parseInt(over.dataset.ci) === drag.ci) over.classList.add('drag-over');
+        }, { passive: false });
+
+        chip.addEventListener('touchend', e => {
+          clearTimeout(longPressTimer);
+          if (drag) {
+            const over = document.querySelector('.col.drag-over');
+            if (over) endDrag(parseInt(over.dataset.ci), parseInt(over.dataset.ki));
+            else cancelDrag();
+            return;
+          }
+          if (selectMode) {
+            e.preventDefault();
+            toggleChipSelect(parseInt(chip.dataset.ci), parseInt(chip.dataset.ki), parseInt(chip.dataset.ii));
+            return;
+          }
+          const t = e.changedTouches[0];
+          const dy = Math.abs(t.clientY - pressStartY);
+          if (!isDragging && dy < 8) {
+            const _ci = parseInt(chip.dataset.ci), _ki = parseInt(chip.dataset.ki), _ii = parseInt(chip.dataset.ii);
+            openFlagPicker(chip, _ci, _ki, _ii, data[_ci].cols[_ki][_ii]?.f || null, data[_ci].cols[_ki][_ii]?.t || '');
+          }
+          isDragging = false;
+        });
+
+        chip.addEventListener('touchcancel', () => { clearTimeout(longPressTimer); cancelDrag(); });
+
+        col.appendChild(chip);
+      });
+
+      // ── Add row (hidden in focus mode) ──
+      if (focusCol === null) {
+        const addRow = document.createElement('div');
+        addRow.className = 'add-row';
+        const addInp = document.createElement('input');
+        addInp.dataset.ci = ci;
+        addInp.dataset.ki = ki;
+        addInp.className = 'add-inp';
+        addInp.placeholder = '+';
+
+        const doneBtn = document.createElement('button');
+        doneBtn.className = 'add-done-btn';
+        doneBtn.textContent = 'סיום';
+        doneBtn.addEventListener('mousedown', e => e.preventDefault());
+        doneBtn.addEventListener('click', () => submitAdd(addInp, ci, ki));
+
+        addInp.addEventListener('paste', e => {
+          e.preventDefault();
+          const txt = (e.clipboardData || window.clipboardData).getData('text');
+          const lines = txt.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+          if (lines.length <= 1) { addInp.value = txt.trim(); return; }
+          lines.forEach(l => data[ci].cols[ki].push({ t: l, f: null }));
+          commit(`${lines.length} הרגלים נוספו`);
+        });
+        addInp.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); submitAdd(addInp, ci, ki); }
+        });
+        addInp.addEventListener('blur', () => submitAdd(addInp, ci, ki));
+
+        addRow.appendChild(addInp);
+        addRow.appendChild(doneBtn);
+        col.appendChild(addRow);
+      }
+      colsEl.appendChild(col);
+    });
+
+    card.appendChild(colsEl);
+    wrapper.appendChild(tab);
+    wrapper.appendChild(card);
+    if (selectedCats.has(ci)) {
+      wrapper.classList.add('cat-selected');
+      tab.style.background = 'rgba(255,59,48,0.22)';
+      card.style.background = 'rgba(255,59,48,0.15)';
+    }
+
+    board.appendChild(wrapper);
+  });
+
+  // tabs are flex:1, no manual width needed
+}
+
+function submitAdd(inp, ci, ki) {
+  const val = inp.value.trim();
+  if (!val) return;
+  data[ci].cols[ki].push({ t: val, f: null, _key: newKey() });
+  commit('הרגל נוסף');
+  inp.value = '';
+  setTimeout(() => {
+    const inp2 = document.querySelector(`.add-inp[data-ci="${ci}"][data-ki="${ki}"]`);
+    if (inp2) inp2.focus();
+  }, 30);
+}
+
+function exportData() {
+  const cols = ['ברגיל', 'בתהליך', 'לשפר בעתיד'];
+  let csv = '\uFEFF' + 'קטגוריה,' + cols.join(',') + '\n';
+  data.forEach(cat => {
+    const maxLen = Math.max(...cat.cols.map(c => c.length), 1);
+    for (let i = 0; i < maxLen; i++) {
+      const row = [i === 0 ? cat.name : ''];
+      cat.cols.forEach(col => row.push(col[i]?.t || ''));
+      csv += row.map(v => '"' + v.replace(/"/g,'""') + '"').join(',') + '\n';
+    }
+  });
+  const uri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  window.open(uri, '_blank');
+}
+
+function showExportModal(csv) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;';
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#1c1c1e;border-radius:16px;padding:16px;width:100%;max-width:500px;display:flex;flex-direction:column;gap:10px;';
+  const title = document.createElement('div');
+  title.textContent = 'העתק את הנתונים';
+  title.style.cssText = 'font-family:Heebo,sans-serif;font-size:15px;font-weight:700;color:#fff;text-align:center;';
+  const ta = document.createElement('textarea');
+  ta.value = csv;
+  ta.style.cssText = 'background:#2c2c2e;border:none;border-radius:10px;color:#aeaeb2;font-size:11px;padding:10px;height:200px;resize:none;font-family:monospace;-webkit-user-select:text;user-select:text;';
+  const copyBtn = document.createElement('button');
+  copyBtn.textContent = 'העתק';
+  copyBtn.style.cssText = 'background:#5ebd7e;color:#0e0e10;font-family:Heebo,sans-serif;font-size:14px;font-weight:700;border:none;border-radius:12px;padding:12px;cursor:pointer;';
+  copyBtn.addEventListener('click', () => {
+    ta.select();
+    try { document.execCommand('copy'); copyBtn.textContent = '✓ הועתק'; setTimeout(() => overlay.remove(), 800); } catch(e) {}
+  });
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = 'סגור';
+  closeBtn.style.cssText = 'background:#2c2c2e;color:#8e8e93;font-family:Heebo,sans-serif;font-size:14px;font-weight:600;border:none;border-radius:12px;padding:10px;cursor:pointer;';
+  closeBtn.addEventListener('click', () => overlay.remove());
+  box.appendChild(title); box.appendChild(ta); box.appendChild(copyBtn); box.appendChild(closeBtn);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  setTimeout(() => ta.select(), 100);
+}
+
+function addCategory() {
+  const inp = document.getElementById('newCatInput');
+  const name = inp.value.trim();
+  if (!name) return;
+  data.push({ name, cols: [[], [], []] });
+  commit('קטגוריה נוספה'); inp.value = '';
+}
+
+document.getElementById('newCatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addCategory();
+});
+
+document.getElementById('newCatInput').addEventListener('paste', e => {
+  e.preventDefault();
+  const txt = (e.clipboardData || window.clipboardData).getData('text');
+  const lines = txt.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  if (lines.length <= 1) { document.getElementById('newCatInput').value = txt.trim(); return; }
+  lines.forEach(name => data.push({ name, cols: [[], [], []] }));
+  commit(`${lines.length} קטגוריות נוספו`);
+});
+
+
+
+let _confirmPickerPos = { top: 0, chipCx: 0 };
+
+function showCatDeleteConfirm(ci, tabEl) {
+  document.getElementById('catDeletePicker')?.remove();
+  const rect = tabEl.getBoundingClientRect();
+  const picker = document.createElement('div');
+  picker.className = 'flag-picker delete-confirm-picker';
+  picker.id = 'catDeletePicker';
+  picker.innerHTML = `<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק קטגוריה</span></button>`;
+  picker.style.top  = '-9999px';
+  picker.style.left = '-9999px';
+  document.body.appendChild(picker);
+  const pw = picker.offsetWidth, ph = picker.offsetHeight;
+  let left = rect.left - pw - 6;
+  let top  = rect.top + rect.height / 2 - ph / 2;
+  if (left < 8) left = rect.right + 6;
+  top = Math.max(8, Math.min(top, window.innerHeight - ph - 8));
+  picker.style.top  = top  + 'px';
+  picker.style.left = left + 'px';
+  const onOutside = e => {
+    if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); }
+  };
+  setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 50);
+  const doDelete = () => {
+    picker.remove(); document.removeEventListener('pointerdown', onOutside, true);
+    data.splice(ci, 1);
+    commit('קטגוריה נמחקה');
+  };
+  picker.querySelector('.dp-ok').addEventListener('click', doDelete);
+  picker.querySelector('.dp-ok').addEventListener('touchend', e => { e.preventDefault(); doDelete(); });
+}
+
+function showDeleteConfirm(habitText, onConfirm) {
+  document.getElementById('deletePicker')?.remove();
+
+  const picker = document.createElement('div');
+  picker.className = 'flag-picker delete-confirm-picker';
+  picker.id = 'deletePicker';
+  picker.innerHTML = `<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק</span></button>`;
+  picker.style.top = _confirmPickerPos.top + 'px';
+  picker.style.left = '-9999px'; // hidden until measured
+  document.body.appendChild(picker);
+
+  // center horizontally around chip center
+  const pw = picker.offsetWidth;
+  const left = Math.max(8, Math.min(_confirmPickerPos.chipCx - pw / 2, window.innerWidth - pw - 8));
+  picker.style.left = left + 'px';
+
+  const onOutside = e => {
+    if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); }
+  };
+  setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 50);
+
+  picker.querySelector('.dp-ok').addEventListener('click', () => {
+    picker.remove(); document.removeEventListener('pointerdown', onOutside, true);
+    onConfirm();
+  });
+}
+
+function showRedoDeleteConfirm(onConfirm) {
+  document.getElementById('redoConfirmPicker')?.remove();
+  const btn = document.getElementById('redoBtn');
+  const rect = btn.getBoundingClientRect();
+
+  const picker = document.createElement('div');
+  picker.className = 'flag-picker delete-confirm-picker';
+  picker.id = 'redoConfirmPicker';
+  picker.innerHTML = `<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק שוב</span></button>`;
+  picker.style.top  = '-9999px';
+  picker.style.left = '-9999px';
+  document.body.appendChild(picker);
+
+  const pw = picker.offsetWidth;
+  const ph = picker.offsetHeight;
+  let left = rect.left + rect.width / 2 - pw / 2;
+  let top  = rect.bottom + 6;
+  left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
+  if (top + ph > window.innerHeight) top = rect.top - ph - 6;
+  picker.style.top  = top  + 'px';
+  picker.style.left = left + 'px';
+
+  const onOutside = e => {
+    if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); }
+  };
+  setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 50);
+
+  const doConfirmHabit = () => { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); onConfirm(); };
+  picker.querySelector('.dp-ok').addEventListener('click', doConfirmHabit);
+  picker.querySelector('.dp-ok').addEventListener('touchend', e => { e.preventDefault(); doConfirmHabit(); });
+}
+
+let focusCol = null;
+
+function setFocusCol(ki) {
+  const items = document.querySelectorAll('.col-legend-item');
+  if (focusCol === ki) {
+    focusCol = null;
+    document.body.classList.remove('focus-mode', 'focus-0', 'focus-1', 'focus-2');
+    items.forEach(el => el.classList.remove('active-focus', 'dimmed'));
+  } else {
+    focusCol = ki;
+    document.body.classList.remove('focus-0', 'focus-1', 'focus-2');
+    document.body.classList.add('focus-mode', `focus-${ki}`);
+    items.forEach((el, i) => {
+      el.classList.toggle('active-focus', i === ki);
+      el.classList.toggle('dimmed', i !== ki);
+    });
+  }
+  render();
+}
+
+// ── Select mode ──────────────────────────────────────────────
+let selectMode = false;
+let selected = []; // [{ci, ki, ii}]
+
+document.querySelectorAll('.col-legend-item').forEach((el, i) => {
+  el.addEventListener('click', () => setFocusCol(i));
+});
+
+render();
+
+// ── Select mode functions ────────────────────────────────────
+
+function toggleSelectMode() {
+  if (catEditMode) return;
+  selectMode = !selectMode;
+  selected = [];
+  document.getElementById('selectBtn').classList.toggle('select-active', selectMode);
+  document.body.classList.toggle('select-mode', selectMode);
+  hideMoveRow();
+  document.getElementById('bulk-bar').classList.toggle('show', selectMode);
+  document.getElementById('bulk-done').style.display = 'none';
+  updateBulkBar();
+  render();
+}
+
+function exitSelectMode() {
+  selectMode = false;
+  selected = [];
+  document.getElementById('selectBtn').classList.remove('select-active');
+  document.body.classList.remove('select-mode');
+  hideMoveRow();
+  document.getElementById('bulk-bar').classList.remove('show');
+  render();
+}
+
+// Find current location of item by its unique key (ci + original text)
+function findItem(key) {
+  for (let ci = 0; ci < data.length; ci++) {
+    for (let ki = 0; ki < 3; ki++) {
+      for (let ii = 0; ii < data[ci].cols[ki].length; ii++) {
+        if (data[ci].cols[ki][ii]._key === key) return {ci, ki, ii};
+      }
+    }
+  }
+  return null;
+}
+
+function toggleChipSelect(ci, ki, ii) {
+  const key = data[ci].cols[ki][ii]._key;
+  const idx = selected.indexOf(key);
+  if (idx >= 0) selected.splice(idx, 1);
+  else selected.push(key);
+  updateBulkBar();
+  render();
+}
+
+function updateBulkBar() {
+  const n = selected.length;
+  document.getElementById('bulk-count').textContent = n + ' נבחרו';
+}
+
+function bulkAction(action) {
+  if (selected.length === 0) return;
+  if (action === 'move') { showMoveRow(); return; }
+
+  // Resolve current positions
+  const resolved = selected.map(k => findItem(k)).filter(Boolean);
+
+  if (action === 'delete') {
+    const sorted = resolved.sort((a,b) => b.ci-a.ci || b.ki-a.ki || b.ii-a.ii);
+    sorted.forEach(({ci,ki,ii}) => data[ci].cols[ki].splice(ii,1));
+    commit(resolved.length + ' הרגלים נמחקו');
+    exitSelectMode(); return;
+  }
+  if (action === 'focus') {
+    resolved.forEach(({ci,ki,ii}) => { data[ci].cols[ki][ii].f = 'focus'; });
+    commit('סומנו כמודגשים');
+  }
+  if (action === 'pause') {
+    resolved.forEach(({ci,ki,ii}) => { data[ci].cols[ki][ii].f = 'pause'; });
+    commit('הושהו');
+  }
+  document.getElementById('bulk-done').style.display = 'block';
+  persist(); render(); updateBulkBar();
+}
+
+function showMoveRow() {
+  document.getElementById('bulk-move-row').classList.add('show');
+}
+function hideMoveRow() {
+  document.getElementById('bulk-move-row').classList.remove('show');
+}
+
+function bulkMove(targetKi) {
+  if (selected.length === 0) return;
+  const resolved = selected.map(k => findItem(k)).filter(Boolean);
+  const sorted = resolved.sort((a,b) => b.ci-a.ci || b.ki-a.ki || b.ii-a.ii);
+  sorted.forEach(({ci,ki,ii}) => {
+    const item = data[ci].cols[ki].splice(ii,1)[0];
+    data[ci].cols[targetKi].push(item);
+  });
+  commit('הרגלים הועברו');
+  hideMoveRow();
+  document.getElementById('bulk-done').style.display = 'block';
+  persist(); render(); updateBulkBar();
+}
+
+
+try {
+  if (window.location.search.includes('t=')) {
+    const toast = document.createElement('div');
+    toast.textContent = '✓';
+    toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.5);background:#1c1c1e;color:#5ebd7e;font-size:48px;width:90px;height:90px;border-radius:24px;display:flex;align-items:center;justify-content:center;z-index:99999;opacity:0;transition:all 0.2s cubic-bezier(0.34,1.4,0.64,1);box-shadow:0 8px 32px rgba(0,0,0,0.6);pointer-events:none;';
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translate(-50%,-50%) scale(1)';
+    });
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translate(-50%,-50%) scale(0.8)';
+      setTimeout(() => toast.remove(), 300);
+    }, 1200);
+    try { window.history.replaceState(null, '', window.location.pathname); } catch(e) {}
+  }
+} catch(e) {}
+</script>
+
+</body>
+</html>
