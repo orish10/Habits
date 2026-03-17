@@ -177,7 +177,6 @@ cursor: pointer;
 -webkit-flex-shrink: 0; flex-shrink: 0;
 position: relative;
 }
-.cat-edit-del.cat-first { opacity: 0.2; pointer-events: none; }
 .cat-edit-del.cat-selected-check {
 background: #ff3b30;
 border-color: #ff3b30;
@@ -191,16 +190,6 @@ display: -webkit-flex; display: flex;
 -webkit-justify-content: center; justify-content: center;
 font-size: 13px; font-weight: 700;
 color: #fff;
-}
-.cat-edit-pencil {
-font-size: 14px; color: #aeaeb2;
-width: 28px; height: 28px;
-display: -webkit-flex; display: flex;
--webkit-align-items: center; align-items: center;
--webkit-justify-content: center; justify-content: center;
-border-radius: 50%;
-background: #1c1c1e;
-cursor: pointer;
 }
 
 .cat-edit-overlay {
@@ -295,13 +284,7 @@ background: rgba(40,40,42,0.5) !important;
 color: #6e6e73 !important;
 border: 1.5px dashed #48484a !important;
 }
-.chip[data-flag=“focus-pause”], .chip[data-flag=“pause-focus”] {
--webkit-box-shadow: 0 0 0 2.5px rgba(255,255,255,0.6) !important;
-box-shadow: 0 0 0 2.5px rgba(255,255,255,0.6) !important;
-background: rgba(40,40,42,0.5) !important;
-color: #6e6e73 !important;
-border: 1.5px dashed #48484a !important;
-}.chip[data-flag=“urgent”] {
+.chip[data-flag=“urgent”] {
 background: rgba(255,59,48,0.2) !important;
 color: #ff3b30 !important;
 }
@@ -555,11 +538,12 @@ display: -webkit-flex; display: flex;
 <body>
 
 <div class="topbar">
-  <h1>הרגלים v57</h1>
+  <h1>הרגלים v59</h1>
   <div class="undo-redo">
     <button class="ur-btn" id="undoBtn" onclick="undo()" title="אחורה (Ctrl+Z)" disabled>↺</button>
     <button class="ur-btn" id="redoBtn" onclick="redo()" title="קדימה (Ctrl+Y)" disabled>↻</button>
     <button class="ur-btn" id="selectBtn" onclick="toggleSelectMode()" title="בחירה">☑</button>
+    <button class="ur-btn" onclick="exportData()" title="ייצוא">⬇</button>
     <button class="ur-btn" onclick="window.location.href = window.location.href + '?t=' + Date.now()" title="רענון">⟳</button>
   </div>
 </div>
@@ -577,12 +561,13 @@ display: -webkit-flex; display: flex;
 
 <div class="wrapper">
   <div id="board"></div>
-  <div id="cat-delete-bar" onclick="bulkDeleteCats()">מחק קטגוריות נבחרות</div>
   <div class="add-cat-bar">
     <input class="add-cat-inp" id="newCatInput" placeholder="+ קטגוריה חדשה..." />
     <button class="add-cat-btn" onclick="addCategory()">הוסף</button>
   </div>
 </div>
+
+<div id="cat-delete-bar" onclick="bulkDeleteCats()">מחק קטגוריות נבחרות</div>
 
 <div id="undo-toast">
   <span id="toast-msg">בוצע</span>
@@ -591,8 +576,6 @@ display: -webkit-flex; display: flex;
 <div id="drag-ghost"></div>
 <div id="cat-drag-ghost"></div>
 
-<!-- Bulk action bar -->
-
 <div id="bulk-bar">
   <span id="bulk-count">0 נבחרו</span>
   <div class="bulk-btn" onclick="bulkAction('focus')">הדגש</div>
@@ -600,8 +583,6 @@ display: -webkit-flex; display: flex;
   <div class="bulk-btn bulk-danger" onclick="bulkAction('delete')">מחק</div>
   <div class="bulk-btn" id="bulk-done" onclick="exitSelectMode()" style="background:#3a3a3c;color:#fff;display:none;">סיום</div>
 </div>
-
-<!-- Bulk move target row -->
 
 <div id="bulk-move-row">
   <div class="bulk-btn bulk-move-sub" onclick="bulkMove(0)">● ברגיל</div>
@@ -613,17 +594,12 @@ display: -webkit-flex; display: flex;
 <script>
 document.addEventListener('contextmenu', e => e.preventDefault());
 
-// ── Flag cycle: null → focus → urgent → pause → null ────────
 const FLAG_CYCLE = [null, 'focus', 'urgent', 'pause'];
 const FLAG_ICON  = {};
 
-// ── Default data ─────────────────────────────────────────────
-// Each item: { t: "text", f: null|"urgent"|"focus"|"pause" }
 function mkItems(arr) { return arr.map(t => ({ t, f: null })); }
-
 const DEFAULT = [];
 
-// ── Migrate old string-based saves ──────────────────────────
 let _keyCounter = 0;
 function newKey() { return 'k' + (++_keyCounter); }
 
@@ -640,7 +616,6 @@ function migrate(d) {
   return d;
 }
 
-// ── History ──────────────────────────────────────────────────
 const MAX_HIST = 80;
 let history = [], histIdx = -1;
 
@@ -659,7 +634,6 @@ function undo() {
 }
 function redo() {
   if (histIdx >= history.length - 1) return;
-  // check if the state we're redoing INTO is a delete relative to current
   const next = history[histIdx + 1];
   const curr = history[histIdx];
   const nextCount = next.reduce((s, c) => s + c.cols.reduce((a, col) => a + col.length, 0), 0);
@@ -681,15 +655,12 @@ document.addEventListener('keydown', e => {
   if ((e.ctrlKey||e.metaKey) && (e.key==='y'||(e.key==='z'&&e.shiftKey))) { e.preventDefault(); redo(); }
 });
 
-// ── Persistence ──────────────────────────────────────────────
 function persist() {
   try {
     const json = JSON.stringify(data);
     localStorage.setItem('hb8', json);
-    localStorage.setItem('hb8_ts', Date.now()); // verify write succeeded
-  } catch(e) {
-    console.warn('persist failed', e);
-  }
+    localStorage.setItem('hb8_ts', Date.now());
+  } catch(e) { console.warn('persist failed', e); }
 }
 function load() {
   try {
@@ -703,8 +674,6 @@ function load() {
   console.log('no saved data');
   return null;
 }
-
-// Save on page hide (iOS reliable)
 window.addEventListener('pagehide', () => { try { localStorage.setItem('hb8', JSON.stringify(data)); } catch(e) {} });
 window.addEventListener('beforeunload', () => { try { localStorage.setItem('hb8', JSON.stringify(data)); } catch(e) {} });
 
@@ -724,9 +693,7 @@ function toggleCollapse(ci) {
   persist(); render();
 }
 
-// ── Toast ─────────────────────────────────────────────────────
 let toastTimer = null;
-
 function showToast(msg) {
   const toast = document.getElementById('undo-toast');
   document.getElementById('toast-msg').textContent = msg;
@@ -734,19 +701,16 @@ function showToast(msg) {
   toast.classList.add('show');
   toastTimer = setTimeout(() => toast.classList.remove('show'), 4000);
 }
-
 function toastUndo() {
   document.getElementById('undo-toast').classList.remove('show');
   clearTimeout(toastTimer);
   undo();
 }
-
 function commit(msg) {
   compact(data); persist(); snapshot(); render();
   showToast(msg || 'בוצע');
 }
 
-// ── Flag picker ──────────────────────────────────────────────
 let activePicker = null;
 
 function handlePickerAction(opt, ci, ki, ii, isFocused, isPaused, habitText) {
@@ -779,55 +743,39 @@ function handlePickerAction(opt, ci, ki, ii, isFocused, isPaused, habitText) {
 
 function openFlagPicker(chip, ci, ki, ii, currentFlag, habitText) {
   closeFlagPicker();
-
   const picker = document.createElement('div');
   picker.className = 'flag-picker';
   picker.id = 'flagPicker';
-
   const isFocused = currentFlag === 'focus' || currentFlag === 'focus-pause';
   const isPaused  = currentFlag === 'pause'  || currentFlag === 'focus-pause';
-
   const options = [
     isFocused
-      ? { flag: 'unfocus', icon: '✕',  label: 'הסר הדגשה', skip: false }
-      : { flag: 'focus',   icon: '*',  label: 'מודגש', cls: 'fp-focus', skip: false },
+      ? { flag: 'unfocus', icon: '✕', label: 'הסר הדגשה', skip: false }
+      : { flag: 'focus',   icon: '*', label: 'מודגש', cls: 'fp-focus', skip: false },
     isPaused
-      ? { flag: 'unpause', icon: '▶',  label: 'המשך',       skip: false }
-      : { flag: 'pause',   icon: '⏸', label: 'מושהה',      skip: false },
+      ? { flag: 'unpause', icon: '▶', label: 'המשך', skip: false }
+      : { flag: 'pause',   icon: '⏸', label: 'מושהה', skip: false },
     { flag: 'delete', icon: '⊗', label: 'מחק', skip: false, danger: true },
   ];
-
   options.filter(opt => !opt.skip).forEach(opt => {
     const btn = document.createElement('button');
     btn.className = 'fp-btn' + (opt.danger ? ' fp-danger' : '') + (opt.cls ? ' ' + opt.cls : '');
     btn.innerHTML = `<span class="fp-icon">${opt.icon}</span><span class="fp-label">${opt.label}</span>`;
     btn.addEventListener('mousedown', e => e.preventDefault());
-    btn.addEventListener('click', () => {
-      handlePickerAction(opt, ci, ki, ii, isFocused, isPaused, habitText);
-    });
-    btn.addEventListener('touchend', e => {
-      e.preventDefault();
-      e.stopPropagation();
-      handlePickerAction(opt, ci, ki, ii, isFocused, isPaused, habitText);
-    });
+    btn.addEventListener('click', () => { handlePickerAction(opt, ci, ki, ii, isFocused, isPaused, habitText); });
+    btn.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); handlePickerAction(opt, ci, ki, ii, isFocused, isPaused, habitText); });
     picker.appendChild(btn);
   });
-
   document.body.appendChild(picker);
   activePicker = picker;
   activePicker._chip = chip;
-
   const rect = chip.getBoundingClientRect();
   const pw = picker.offsetWidth;
   const ph = picker.offsetHeight;
-
-  // position:fixed uses viewport coords — no scrollY needed
   let left = rect.left + rect.width / 2 - pw / 2;
   let top  = rect.bottom + 4;
-
   left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
   if (rect.bottom + 4 + ph > window.innerHeight) top = rect.top - ph - 4;
-
   picker.style.top  = top + 'px';
   picker.style.left = left + 'px';
   _confirmPickerPos = { top, chipCx: rect.left + rect.width / 2 };
@@ -842,7 +790,6 @@ function openChipEdit(chip, ci, ki, ii) {
   inp.value = text;
   inp.rows = 1;
   chip.appendChild(inp);
-  // Allow text selection inside input
   inp.style.webkitUserSelect = 'text';
   inp.style.userSelect = 'text';
   inp.focus(); inp.select();
@@ -861,15 +808,13 @@ function openChipEdit(chip, ci, ki, ii) {
 function closeFlagPicker() {
   if (activePicker) { activePicker.remove(); activePicker = null; }
 }
-
 document.addEventListener('pointerdown', e => {
   if (activePicker && !activePicker.contains(e.target)) closeFlagPicker();
 });
 
-// ── Drag ─────────────────────────────────────────────────────
 let drag = null, longPressTimer = null;
 const LONG_MS = 480;
-const ghost   = document.getElementById('drag-ghost');
+const ghost = document.getElementById('drag-ghost');
 
 function startDrag(ci, ki, ii, el, text, x, y) {
   closeFlagPicker();
@@ -889,13 +834,10 @@ function endDrag(tci, tki) {
   el.classList.remove('dragging');
   ghost.style.display = 'none';
   clearDragOver();
-
   if (tci !== null && tci === ci && tki !== ki) {
     const draggedKey = data[ci].cols[ki][ii]?._key;
     const isDraggedSelected = draggedKey && selected.includes(draggedKey);
-
     if (selectMode && isDraggedSelected && selected.length > 1) {
-      // Move all selected chips in this category to target column
       const resolved = selected.map(k => findItem(k)).filter(Boolean).filter(item => item.ci === ci);
       const sorted = resolved.sort((a,b) => b.ki-a.ki || b.ii-a.ii);
       sorted.forEach(({ci:c, ki:k, ii:i}) => {
@@ -922,11 +864,9 @@ function cancelDrag() {
 function clearDragOver() {
   document.querySelectorAll('.col.drag-over').forEach(c => c.classList.remove('drag-over'));
 }
-
 document.addEventListener('mousemove', e => { if (drag) { moveGhost(e.clientX, e.clientY); clearDragOver(); const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('.col'); if (over && parseInt(over.dataset.ci) === drag.ci) over.classList.add('drag-over'); } });
-document.addEventListener('mouseup',   () => { clearTimeout(longPressTimer); if (drag) cancelDrag(); });
+document.addEventListener('mouseup', () => { clearTimeout(longPressTimer); if (drag) cancelDrag(); });
 
-// ── Category edit mode ───────────────────────────────────────
 let catEditMode = false;
 let selectedCats = new Set();
 
@@ -953,7 +893,6 @@ function updateCatDeleteBar() {
 }
 
 function toggleCatSelect(ci) {
-  const key = data[ci].name + '_' + ci;
   if (selectedCats.has(ci)) selectedCats.delete(ci);
   else selectedCats.add(ci);
   updateCatDeleteBar();
@@ -985,47 +924,22 @@ function openCatRename(ci, overlayEl) {
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); if (e.key === 'Escape') { inp.value = data[ci].name; inp.blur(); } });
 }
 
-// ── Category drag (sorting) ──────────────────────────────────
 let catDrag = null;
 const catGhost = document.getElementById('cat-drag-ghost');
 
-// insert-line indicator
 const catInsertLine = document.createElement('div');
-catInsertLine.style.cssText = `
-  position:fixed; left:0; right:0; height:3px;
-  background: rgba(255,255,255,0.7);
-  border-radius:2px; z-index:9997; pointer-events:none;
-  display:none;
-  box-shadow: 0 0 8px rgba(255,255,255,0.4);
-`;
+catInsertLine.style.cssText = `position:fixed; left:0; right:0; height:3px; background: rgba(255,255,255,0.7); border-radius:2px; z-index:9997; pointer-events:none; display:none; box-shadow: 0 0 8px rgba(255,255,255,0.4);`;
 document.body.appendChild(catInsertLine);
 
 function startCatDrag(ci, tabEl, startY) {
   const wrappers = Array.from(document.querySelectorAll('.cat-wrapper'));
   const el = wrappers[ci];
   const rect = el.getBoundingClientRect();
-
-  // snapshot original positions
   const origRects = wrappers.map(w => w.getBoundingClientRect());
-
-  // make dragged element fixed
-  el.style.cssText += `
-    position:fixed;
-    top:${rect.top}px; left:${rect.left}px;
-    width:${rect.width}px;
-    z-index:9999;
-    box-shadow:0 12px 40px rgba(0,0,0,0.8);
-    opacity:0.97;
-    transition:none;
-    pointer-events:none;
-    margin:0;
-  `;
-
-  // placeholder to keep space
+  el.style.cssText += `position:fixed; top:${rect.top}px; left:${rect.left}px; width:${rect.width}px; z-index:9999; box-shadow:0 12px 40px rgba(0,0,0,0.8); opacity:0.97; transition:none; pointer-events:none; margin:0;`;
   const placeholder = document.createElement('div');
   placeholder.style.cssText = `height:${rect.height}px; margin-bottom:6px; flex-shrink:0;`;
   el.parentNode.insertBefore(placeholder, el);
-
   catDrag = { ci, el, placeholder, origRects, startY, fixedTop: rect.top, insertIdx: ci };
   moveFloatingCat(startY);
 }
@@ -1033,46 +947,24 @@ function startCatDrag(ci, tabEl, startY) {
 function moveFloatingCat(y) {
   if (!catDrag) return;
   const { el, origRects, ci, startY, fixedTop } = catDrag;
-
-  // move dragged element
   const newTop = fixedTop + (y - startY);
   el.style.top = newTop + 'px';
   const centerY = newTop + origRects[ci].height / 2;
-
-  // find insert index using ORIGINAL rects (before any transforms)
-  // imagine all items in original positions, where does centerY fall?
-  let insertIdx = 0;
-  for (let i = 0; i < origRects.length; i++) {
-    if (i === ci) continue;
-    const mid = origRects[i].top + origRects[i].height / 2;
-    if (centerY > mid) {
-      insertIdx = i >= ci ? i : i;
-    }
-  }
-  // if centerY is above everything, insertIdx stays 0 unless ci=0
-  // recalculate cleanly: find first item whose mid is above centerY
-  insertIdx = ci; // default: no move
+  let insertIdx = ci;
   let found = false;
-  // build list of indices excluding ci
   const others = origRects.map((r, i) => i).filter(i => i !== ci);
   for (let j = 0; j < others.length; j++) {
     const i = others[j];
     const mid = origRects[i].top + origRects[i].height / 2;
     if (centerY <= mid) {
-      // insert before i
       insertIdx = i > ci ? i - 1 : i;
       found = true;
       break;
     }
   }
-  if (!found) {
-    // below everything
-    insertIdx = origRects.length - 1;
-  }
+  if (!found) insertIdx = origRects.length - 1;
   insertIdx = Math.max(0, Math.min(data.length - 1, insertIdx));
   catDrag.insertIdx = insertIdx;
-
-  // shift other wrappers
   const wrappers = Array.from(document.querySelectorAll('.cat-wrapper'));
   const dragH = origRects[ci].height + 6;
   wrappers.forEach((w, i) => {
@@ -1083,15 +975,10 @@ function moveFloatingCat(y) {
     w.style.transform = `translateY(${shift}px)`;
     w.style.transition = 'transform 0.18s ease';
   });
-
-  // insert line
   if (insertIdx === ci) { catInsertLine.style.display = 'none'; return; }
   let lineY;
-  if (insertIdx < ci) {
-    lineY = origRects[insertIdx].top;
-  } else {
-    lineY = origRects[insertIdx].bottom + 3;
-  }
+  if (insertIdx < ci) lineY = origRects[insertIdx].top;
+  else lineY = origRects[insertIdx].bottom + 3;
   catInsertLine.style.display = 'block';
   catInsertLine.style.top = lineY + 'px';
 }
@@ -1099,18 +986,11 @@ function moveFloatingCat(y) {
 function endCatDrag(y) {
   if (!catDrag) return;
   const { el, placeholder, ci, insertIdx } = catDrag;
-
-  // cleanup
   catInsertLine.style.display = 'none';
   el.style.cssText = '';
   placeholder.remove();
-  document.querySelectorAll('.cat-wrapper').forEach(w => {
-    w.style.transform = '';
-    w.style.transition = '';
-  });
-
+  document.querySelectorAll('.cat-wrapper').forEach(w => { w.style.transform = ''; w.style.transition = ''; });
   catDrag = null;
-
   if (insertIdx !== ci) {
     const [item] = data.splice(ci, 1);
     data.splice(insertIdx, 0, item);
@@ -1120,7 +1000,6 @@ function endCatDrag(y) {
   }
 }
 
-// ── Render ───────────────────────────────────────────────────
 function render() {
   const board = document.getElementById('board');
   board.innerHTML = '';
@@ -1129,27 +1008,20 @@ function render() {
     const wrapper = document.createElement('div');
     wrapper.className = 'cat-wrapper';
 
-    // Side tab with category name + dynamic count
     const tab = document.createElement('div');
     tab.className = 'cat-tab';
     tab.dataset.ci = ci;
 
-    // Long press → drag (for sorting), short press → collapse
     let tabPressTimer = null, tabDragging = false;
     tab.addEventListener('pointerdown', e => {
       if (catEditMode) return;
       tabDragging = false;
-      tabPressTimer = setTimeout(() => {
-        tabPressTimer = null;
-        tabDragging = true;
-        startCatDrag(ci, tab, e.clientY);
-      }, 500);
+      tabPressTimer = setTimeout(() => { tabPressTimer = null; tabDragging = true; startCatDrag(ci, tab, e.clientY); }, 500);
     }, { passive: true });
     tab.addEventListener('touchmove', e => {
       if (!tabDragging) return;
       e.preventDefault();
-      const t = e.touches[0];
-      moveFloatingCat(t.clientY);
+      moveFloatingCat(e.touches[0].clientY);
     }, { passive: false });
     tab.addEventListener('touchend', e => {
       if (tabDragging) { endCatDrag(e.changedTouches[0].clientY); tabDragging = false; return; }
@@ -1157,13 +1029,10 @@ function render() {
     });
     tab.addEventListener('touchcancel', () => {
       clearTimeout(tabPressTimer); tabPressTimer = null;
-      if (tabDragging) { tabDragging = false; catDrag = null; catGhost.style.display = 'none'; document.querySelectorAll('.cat-wrapper').forEach(w => w.classList.remove('cat-dragging','cat-drag-above','cat-drag-below')); render(); }
+      if (tabDragging) { tabDragging = false; catDrag = null; document.querySelectorAll('.cat-wrapper').forEach(w => w.classList.remove('cat-dragging','cat-drag-above','cat-drag-below')); render(); }
     });
     tab.addEventListener('pointermove', e => {
-      if (!tabDragging) {
-        if (Math.abs(e.movementY) > 4) { clearTimeout(tabPressTimer); tabPressTimer = null; }
-        return;
-      }
+      if (!tabDragging) { if (Math.abs(e.movementY) > 4) { clearTimeout(tabPressTimer); tabPressTimer = null; } return; }
       moveFloatingCat(e.clientY);
     });
     tab.addEventListener('pointerup', e => {
@@ -1172,7 +1041,7 @@ function render() {
     });
     tab.addEventListener('pointercancel', () => {
       clearTimeout(tabPressTimer); tabPressTimer = null;
-      if (tabDragging) { tabDragging = false; catDrag = null; catGhost.style.display = 'none'; document.querySelectorAll('.cat-wrapper').forEach(w => w.classList.remove('cat-dragging','cat-drag-above','cat-drag-below')); render(); }
+      if (tabDragging) { tabDragging = false; catDrag = null; document.querySelectorAll('.cat-wrapper').forEach(w => w.classList.remove('cat-dragging','cat-drag-above','cat-drag-below')); render(); }
     });
 
     const tabLabel = document.createElement('span');
@@ -1180,43 +1049,34 @@ function render() {
     tabLabel.textContent = cat.name.length > 8 ? cat.name.slice(0, 8) + '…' : cat.name;
     tab.appendChild(tabLabel);
 
-    // Count
     const tabCount = document.createElement('span');
     tabCount.className = 'cat-tab-count';
     if (focusCol !== null) {
       tabCount.textContent = (cat.cols[focusCol] || []).length;
-    tabCount.style.color = ['#5ebd7e', '#d4955a', '#8e8e93'][focusCol];
+      tabCount.style.color = ['#5ebd7e', '#d4955a', '#8e8e93'][focusCol];
     } else {
       tabCount.textContent = cat.cols.reduce((s, c) => s + c.length, 0);
     }
     tab.appendChild(tabCount);
 
-    // Edit mode actions (delete only)
     const editActions = document.createElement('div');
     editActions.className = 'cat-edit-actions';
-
     const delBtn = document.createElement('div');
     delBtn.className = 'cat-edit-del';
     delBtn.classList.toggle('cat-selected-check', selectedCats.has(ci));
     delBtn.addEventListener('pointerdown', e => e.stopPropagation());
     delBtn.addEventListener('click', e => { e.stopPropagation(); toggleCatSelect(ci); });
     delBtn.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); toggleCatSelect(ci); });
-
     editActions.appendChild(delBtn);
     tab.appendChild(editActions);
 
     const card = document.createElement('div');
     card.className = 'category-card';
 
-    // Overlay shown in edit mode
     const overlay = document.createElement('div');
     overlay.className = 'cat-edit-overlay';
     overlay.textContent = cat.name;
-
-    // Double click to rename
     overlay.addEventListener('dblclick', e => { e.stopPropagation(); openCatRename(ci, overlay); });
-
-    // Double tap to rename on touch
     let lastTap = 0;
     overlay.addEventListener('touchend', e => {
       if (!catEditMode) return;
@@ -1224,7 +1084,6 @@ function render() {
       if (now - lastTap < 350) { e.preventDefault(); openCatRename(ci, overlay); }
       lastTap = now;
     });
-
     card.appendChild(overlay);
 
     if (cat.collapsed && focusCol === null) {
@@ -1237,7 +1096,9 @@ function render() {
       card.appendChild(chevron);
       card.addEventListener('click', () => toggleCollapse(ci));
       card.addEventListener('touchend', e => { e.preventDefault(); toggleCollapse(ci); });
-      wrapper.appendChild(tab); wrapper.appendChild(card); board.appendChild(wrapper); return;
+      wrapper.appendChild(tab); wrapper.appendChild(card);
+      if (selectedCats.has(ci)) { wrapper.classList.add('cat-selected'); tab.style.background = 'rgba(255,59,48,0.22)'; card.style.background = 'rgba(255,59,48,0.15)'; }
+      board.appendChild(wrapper); return;
     }
 
     const colsEl = document.createElement('div');
@@ -1249,55 +1110,25 @@ function render() {
       col.className = `col ${colClass}`;
       col.dataset.ci = ci; col.dataset.ki = ki;
 
-      // drag-over handled in chip pointermove
-
       (cat.cols[ki] || []).forEach((item, ii) => {
         const text = item.t;
         const flag = item.f || null;
-
         const chip = document.createElement('div');
         chip.className = 'chip';
         if (flag) chip.dataset.flag = flag;
-
-        // Apply flag styles inline for Safari
-        if (flag === 'focus') {
-          chip.style.webkitBoxShadow = '0 0 0 2.5px rgba(255,255,255,0.6)';
-          chip.style.boxShadow = '0 0 0 2.5px rgba(255,255,255,0.6)';
-        } else if (flag === 'pause') {
-          chip.style.background = '#28282a';
-          chip.style.color = '#6e6e73';
-          chip.style.border = '1.5px dashed #48484a';
-        } else if (flag === 'urgent') {
-          chip.style.background = 'rgba(255,59,48,0.2)';
-          chip.style.color = '#ff3b30';
-        }
-
-        // Flag icon
-        if (flag && FLAG_ICON[flag]) {
-          const iconEl = document.createElement('span');
-          iconEl.className = 'chip-flag';
-          iconEl.textContent = FLAG_ICON[flag];
-          chip.appendChild(iconEl);
-        }
+        if (flag === 'focus') { chip.style.webkitBoxShadow = '0 0 0 2.5px rgba(255,255,255,0.6)'; chip.style.boxShadow = '0 0 0 2.5px rgba(255,255,255,0.6)'; }
+        else if (flag === 'pause') { chip.style.background = '#28282a'; chip.style.color = '#6e6e73'; chip.style.border = '1.5px dashed #48484a'; }
+        else if (flag === 'urgent') { chip.style.background = 'rgba(255,59,48,0.2)'; chip.style.color = '#ff3b30'; }
+        if (flag && FLAG_ICON[flag]) { const iconEl = document.createElement('span'); iconEl.className = 'chip-flag'; iconEl.textContent = FLAG_ICON[flag]; chip.appendChild(iconEl); }
         const textEl = document.createElement('span');
         textEl.className = 'chip-text';
         textEl.textContent = text;
         chip.appendChild(textEl);
+        chip.dataset.ci = ci; chip.dataset.ki = ki; chip.dataset.ii = ii;
+        if (selectMode && item._key && selected.includes(item._key)) chip.classList.add('selected');
 
-        chip.dataset.ci = ci;
-        chip.dataset.ki = ki;
-        chip.dataset.ii = ii;
-
-        // Mark selected in select mode
-        if (selectMode && item._key && selected.includes(item._key)) {
-          chip.classList.add('selected');
-        }
-
-        // ── Tap → flag picker / Long press → drag ──
         let isDragging = false;
         let pressStartX = 0, pressStartY = 0;
-
-        // MOUSE
         let pickerWasOpen = false;
         chip.addEventListener('mousedown', e => {
           if (e.button !== 0) return;
@@ -1307,63 +1138,37 @@ function render() {
           pressStartX = e.clientX; pressStartY = e.clientY;
           clearTimeout(longPressTimer);
           if (focusCol !== null) return;
-          longPressTimer = setTimeout(() => {
-            isDragging = true;
-            startDrag(ci, ki, ii, chip, text, e.clientX, e.clientY);
-          }, LONG_MS);
+          longPressTimer = setTimeout(() => { isDragging = true; startDrag(ci, ki, ii, chip, text, e.clientX, e.clientY); }, LONG_MS);
         });
-        chip.addEventListener('mousemove', e => {
-          if (Math.abs(e.clientX - pressStartX) > 6 || Math.abs(e.clientY - pressStartY) > 6)
-            clearTimeout(longPressTimer);
-        });
+        chip.addEventListener('mousemove', e => { if (Math.abs(e.clientX - pressStartX) > 6 || Math.abs(e.clientY - pressStartY) > 6) clearTimeout(longPressTimer); });
         let pendingPicker = null;
         chip.addEventListener('mouseup', () => {
           clearTimeout(longPressTimer);
-          if (drag) {
-            const over = document.querySelector('.col.drag-over');
-            if (over) endDrag(parseInt(over.dataset.ci), parseInt(over.dataset.ki));
-            else cancelDrag();
-            return;
-          }
+          if (drag) { const over = document.querySelector('.col.drag-over'); if (over) endDrag(parseInt(over.dataset.ci), parseInt(over.dataset.ki)); else cancelDrag(); return; }
           if (isDragging) { isDragging = false; return; }
           isDragging = false;
           clearTimeout(pendingPicker);
-          if (pickerWasOpen) {
-            closeFlagPicker();
-          } else {
+          if (pickerWasOpen) { closeFlagPicker(); } else {
             pendingPicker = setTimeout(() => {
               const _ci = parseInt(chip.dataset.ci), _ki = parseInt(chip.dataset.ki), _ii = parseInt(chip.dataset.ii);
               openFlagPicker(chip, _ci, _ki, _ii, data[_ci].cols[_ki][_ii]?.f || null, data[_ci].cols[_ki][_ii]?.t || '');
             }, 0);
           }
         });
-
-        chip.addEventListener('dblclick', e => {
-          e.stopPropagation();
-          clearTimeout(pendingPicker);
-          closeFlagPicker();
-          openChipEdit(chip, ci, ki, ii);
-        });
-
-        // TOUCH
+        chip.addEventListener('dblclick', e => { e.stopPropagation(); clearTimeout(pendingPicker); closeFlagPicker(); openChipEdit(chip, ci, ki, ii); });
         chip.addEventListener('touchstart', e => {
           isDragging = false;
           const t = e.touches[0];
           pressStartX = t.clientX; pressStartY = t.clientY;
           clearTimeout(longPressTimer);
           if (focusCol !== null) return;
-          longPressTimer = setTimeout(() => {
-            isDragging = true;
-            startDrag(ci, ki, ii, chip, text, t.clientX, t.clientY);
-          }, LONG_MS);
+          longPressTimer = setTimeout(() => { isDragging = true; startDrag(ci, ki, ii, chip, text, t.clientX, t.clientY); }, LONG_MS);
         }, { passive: true });
-
         chip.addEventListener('touchmove', e => {
           const t = e.touches[0];
-          const dx = Math.abs(t.clientX - pressStartX);
-          const dy = Math.abs(t.clientY - pressStartY);
+          const dx = Math.abs(t.clientX - pressStartX), dy = Math.abs(t.clientY - pressStartY);
           if (dx > 6 || dy > 6) clearTimeout(longPressTimer);
-          if (!drag) return; // allow scroll if not dragging
+          if (!drag) return;
           e.preventDefault();
           moveGhost(t.clientX, t.clientY);
           clearDragOver();
@@ -1371,20 +1176,10 @@ function render() {
           const over = el && el.closest('.col');
           if (over && parseInt(over.dataset.ci) === drag.ci) over.classList.add('drag-over');
         }, { passive: false });
-
         chip.addEventListener('touchend', e => {
           clearTimeout(longPressTimer);
-          if (drag) {
-            const over = document.querySelector('.col.drag-over');
-            if (over) endDrag(parseInt(over.dataset.ci), parseInt(over.dataset.ki));
-            else cancelDrag();
-            return;
-          }
-          if (selectMode) {
-            e.preventDefault();
-            toggleChipSelect(parseInt(chip.dataset.ci), parseInt(chip.dataset.ki), parseInt(chip.dataset.ii));
-            return;
-          }
+          if (drag) { const over = document.querySelector('.col.drag-over'); if (over) endDrag(parseInt(over.dataset.ci), parseInt(over.dataset.ki)); else cancelDrag(); return; }
+          if (selectMode) { e.preventDefault(); toggleChipSelect(parseInt(chip.dataset.ci), parseInt(chip.dataset.ki), parseInt(chip.dataset.ii)); return; }
           const t = e.changedTouches[0];
           const dy = Math.abs(t.clientY - pressStartY);
           if (!isDragging && dy < 8) {
@@ -1393,28 +1188,22 @@ function render() {
           }
           isDragging = false;
         });
-
         chip.addEventListener('touchcancel', () => { clearTimeout(longPressTimer); cancelDrag(); });
-
         col.appendChild(chip);
       });
 
-      // ── Add row (hidden in focus mode) ──
       if (focusCol === null) {
         const addRow = document.createElement('div');
         addRow.className = 'add-row';
         const addInp = document.createElement('input');
-        addInp.dataset.ci = ci;
-        addInp.dataset.ki = ki;
+        addInp.dataset.ci = ci; addInp.dataset.ki = ki;
         addInp.className = 'add-inp';
         addInp.placeholder = '+';
-
         const doneBtn = document.createElement('button');
         doneBtn.className = 'add-done-btn';
         doneBtn.textContent = 'סיום';
         doneBtn.addEventListener('mousedown', e => e.preventDefault());
         doneBtn.addEventListener('click', () => submitAdd(addInp, ci, ki));
-
         addInp.addEventListener('paste', e => {
           e.preventDefault();
           const txt = (e.clipboardData || window.clipboardData).getData('text');
@@ -1423,13 +1212,9 @@ function render() {
           lines.forEach(l => data[ci].cols[ki].push({ t: l, f: null }));
           commit(`${lines.length} הרגלים נוספו`);
         });
-        addInp.addEventListener('keydown', e => {
-          if (e.key === 'Enter') { e.preventDefault(); submitAdd(addInp, ci, ki); }
-        });
+        addInp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submitAdd(addInp, ci, ki); } });
         addInp.addEventListener('blur', () => submitAdd(addInp, ci, ki));
-
-        addRow.appendChild(addInp);
-        addRow.appendChild(doneBtn);
+        addRow.appendChild(addInp); addRow.appendChild(doneBtn);
         col.appendChild(addRow);
       }
       colsEl.appendChild(col);
@@ -1438,16 +1223,9 @@ function render() {
     card.appendChild(colsEl);
     wrapper.appendChild(tab);
     wrapper.appendChild(card);
-    if (selectedCats.has(ci)) {
-      wrapper.classList.add('cat-selected');
-      tab.style.background = 'rgba(255,59,48,0.22)';
-      card.style.background = 'rgba(255,59,48,0.15)';
-    }
-
+    if (selectedCats.has(ci)) { wrapper.classList.add('cat-selected'); tab.style.background = 'rgba(255,59,48,0.22)'; card.style.background = 'rgba(255,59,48,0.15)'; }
     board.appendChild(wrapper);
   });
-
-  // tabs are flex:1, no manual width needed
 }
 
 function submitAdd(inp, ci, ki) {
@@ -1456,10 +1234,63 @@ function submitAdd(inp, ci, ki) {
   data[ci].cols[ki].push({ t: val, f: null, _key: newKey() });
   commit('הרגל נוסף');
   inp.value = '';
-  setTimeout(() => {
-    const inp2 = document.querySelector(`.add-inp[data-ci="${ci}"][data-ki="${ki}"]`);
-    if (inp2) inp2.focus();
-  }, 30);
+  setTimeout(() => { const inp2 = document.querySelector(`.add-inp[data-ci="${ci}"][data-ki="${ki}"]`); if (inp2) inp2.focus(); }, 30);
+}
+
+function exportData() {
+  const cols = ['ברגיל', 'בתהליך', 'לשפר בעתיד'];
+  let csv = 'קטגוריה,' + cols.join(',') + '\n';
+  data.forEach(cat => {
+    const maxLen = Math.max(...cat.cols.map(c => c.length), 1);
+    for (let i = 0; i < maxLen; i++) {
+      const row = [i === 0 ? cat.name : ''];
+      cat.cols.forEach(col => row.push(col[i]?.t || ''));
+      csv += row.map(v => '"' + v.replace(/"/g,'""') + '"').join(',') + '\n';
+    }
+  });
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:99999;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;padding:20px;-webkit-box-sizing:border-box;box-sizing:border-box;';
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#1c1c1e;border-radius:16px;padding:16px;width:100%;max-width:500px;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;gap:10px;';
+  const title = document.createElement('div');
+  title.textContent = 'העתק נתונים (CSV)';
+  title.style.cssText = 'font-family:Heebo,sans-serif;font-size:15px;font-weight:700;color:#fff;text-align:center;';
+  const ta = document.createElement('textarea');
+  ta.value = csv;
+  ta.readOnly = true;
+  ta.style.cssText = 'background:#2c2c2e;border:none;border-radius:10px;color:#aeaeb2;font-size:11px;padding:10px;height:180px;resize:none;font-family:monospace;-webkit-user-select:text;user-select:text;width:100%;-webkit-box-sizing:border-box;box-sizing:border-box;';
+  const copyBtn = document.createElement('button');
+  copyBtn.textContent = 'העתק הכל';
+  copyBtn.style.cssText = 'background:#5ebd7e;color:#0e0e10;font-family:Heebo,sans-serif;font-size:14px;font-weight:700;border:none;border-radius:12px;padding:12px;cursor:pointer;';
+  copyBtn.addEventListener('click', () => {
+    ta.select();
+    ta.setSelectionRange(0, 99999);
+    try {
+      document.execCommand('copy');
+      copyBtn.textContent = '✓ הועתק';
+      setTimeout(() => overlay.remove(), 800);
+    } catch(e) {}
+  });
+  copyBtn.addEventListener('touchend', e => {
+    e.preventDefault();
+    ta.select();
+    ta.setSelectionRange(0, 99999);
+    try {
+      document.execCommand('copy');
+      copyBtn.textContent = '✓ הועתק';
+      setTimeout(() => overlay.remove(), 800);
+    } catch(e) {}
+  });
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = 'סגור';
+  closeBtn.style.cssText = 'background:#2c2c2e;color:#8e8e93;font-family:Heebo,sans-serif;font-size:14px;font-weight:600;border:none;border-radius:12px;padding:10px;cursor:pointer;';
+  closeBtn.addEventListener('click', () => overlay.remove());
+  closeBtn.addEventListener('touchend', e => { e.preventDefault(); overlay.remove(); });
+  box.appendChild(title); box.appendChild(ta); box.appendChild(copyBtn); box.appendChild(closeBtn);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  setTimeout(() => { ta.select(); ta.setSelectionRange(0, 99999); }, 100);
 }
 
 function addCategory() {
@@ -1469,11 +1300,7 @@ function addCategory() {
   data.push({ name, cols: [[], [], []] });
   commit('קטגוריה נוספה'); inp.value = '';
 }
-
-document.getElementById('newCatInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') addCategory();
-});
-
+document.getElementById('newCatInput').addEventListener('keydown', e => { if (e.key === 'Enter') addCategory(); });
 document.getElementById('newCatInput').addEventListener('paste', e => {
   e.preventDefault();
   const txt = (e.clipboardData || window.clipboardData).getData('text');
@@ -1482,8 +1309,6 @@ document.getElementById('newCatInput').addEventListener('paste', e => {
   lines.forEach(name => data.push({ name, cols: [[], [], []] }));
   commit(`${lines.length} קטגוריות נוספו`);
 });
-
-
 
 let _confirmPickerPos = { top: 0, chipCx: 0 };
 
@@ -1494,90 +1319,64 @@ function showCatDeleteConfirm(ci, tabEl) {
   picker.className = 'flag-picker delete-confirm-picker';
   picker.id = 'catDeletePicker';
   picker.innerHTML = `<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק קטגוריה</span></button>`;
-  picker.style.top  = '-9999px';
-  picker.style.left = '-9999px';
+  picker.style.top = '-9999px'; picker.style.left = '-9999px';
   document.body.appendChild(picker);
   const pw = picker.offsetWidth, ph = picker.offsetHeight;
   let left = rect.left - pw - 6;
-  let top  = rect.top + rect.height / 2 - ph / 2;
+  let top = rect.top + rect.height / 2 - ph / 2;
   if (left < 8) left = rect.right + 6;
   top = Math.max(8, Math.min(top, window.innerHeight - ph - 8));
-  picker.style.top  = top  + 'px';
-  picker.style.left = left + 'px';
-  const onOutside = e => {
-    if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); }
-  };
+  picker.style.top = top + 'px'; picker.style.left = left + 'px';
+  const onOutside = e => { if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); } };
   setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 50);
-  const doDelete = () => {
-    picker.remove(); document.removeEventListener('pointerdown', onOutside, true);
-    data.splice(ci, 1);
-    commit('קטגוריה נמחקה');
-  };
+  const doDelete = () => { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); data.splice(ci, 1); commit('קטגוריה נמחקה'); };
   picker.querySelector('.dp-ok').addEventListener('click', doDelete);
   picker.querySelector('.dp-ok').addEventListener('touchend', e => { e.preventDefault(); doDelete(); });
 }
 
 function showDeleteConfirm(habitText, onConfirm) {
   document.getElementById('deletePicker')?.remove();
-
   const picker = document.createElement('div');
   picker.className = 'flag-picker delete-confirm-picker';
   picker.id = 'deletePicker';
   picker.innerHTML = `<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק</span></button>`;
   picker.style.top = _confirmPickerPos.top + 'px';
-  picker.style.left = '-9999px'; // hidden until measured
+  picker.style.left = '-9999px';
   document.body.appendChild(picker);
-
-  // center horizontally around chip center
   const pw = picker.offsetWidth;
   const left = Math.max(8, Math.min(_confirmPickerPos.chipCx - pw / 2, window.innerWidth - pw - 8));
   picker.style.left = left + 'px';
-
-  const onOutside = e => {
-    if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); }
-  };
+  const onOutside = e => { if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); } };
   setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 50);
-
-  picker.querySelector('.dp-ok').addEventListener('click', () => {
-    picker.remove(); document.removeEventListener('pointerdown', onOutside, true);
-    onConfirm();
-  });
+  const doConfirmHabit = () => { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); onConfirm(); };
+  picker.querySelector('.dp-ok').addEventListener('click', doConfirmHabit);
+  picker.querySelector('.dp-ok').addEventListener('touchend', e => { e.preventDefault(); doConfirmHabit(); });
 }
 
 function showRedoDeleteConfirm(onConfirm) {
   document.getElementById('redoConfirmPicker')?.remove();
   const btn = document.getElementById('redoBtn');
   const rect = btn.getBoundingClientRect();
-
   const picker = document.createElement('div');
   picker.className = 'flag-picker delete-confirm-picker';
   picker.id = 'redoConfirmPicker';
   picker.innerHTML = `<button class="fp-btn fp-danger dp-ok"><span class="dp-delete-label">מחק שוב</span></button>`;
-  picker.style.top  = '-9999px';
-  picker.style.left = '-9999px';
+  picker.style.top = '-9999px'; picker.style.left = '-9999px';
   document.body.appendChild(picker);
-
-  const pw = picker.offsetWidth;
-  const ph = picker.offsetHeight;
+  const pw = picker.offsetWidth, ph = picker.offsetHeight;
   let left = rect.left + rect.width / 2 - pw / 2;
-  let top  = rect.bottom + 6;
+  let top = rect.bottom + 6;
   left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
   if (top + ph > window.innerHeight) top = rect.top - ph - 6;
-  picker.style.top  = top  + 'px';
-  picker.style.left = left + 'px';
-
-  const onOutside = e => {
-    if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); }
-  };
+  picker.style.top = top + 'px'; picker.style.left = left + 'px';
+  const onOutside = e => { if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); } };
   setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 50);
-
   const doConfirmHabit = () => { picker.remove(); document.removeEventListener('pointerdown', onOutside, true); onConfirm(); };
   picker.querySelector('.dp-ok').addEventListener('click', doConfirmHabit);
   picker.querySelector('.dp-ok').addEventListener('touchend', e => { e.preventDefault(); doConfirmHabit(); });
 }
 
 let focusCol = null;
-
 function setFocusCol(ki) {
   const items = document.querySelectorAll('.col-legend-item');
   if (focusCol === ki) {
@@ -1588,25 +1387,19 @@ function setFocusCol(ki) {
     focusCol = ki;
     document.body.classList.remove('focus-0', 'focus-1', 'focus-2');
     document.body.classList.add('focus-mode', `focus-${ki}`);
-    items.forEach((el, i) => {
-      el.classList.toggle('active-focus', i === ki);
-      el.classList.toggle('dimmed', i !== ki);
-    });
+    items.forEach((el, i) => { el.classList.toggle('active-focus', i === ki); el.classList.toggle('dimmed', i !== ki); });
   }
   render();
 }
 
-// ── Select mode ──────────────────────────────────────────────
 let selectMode = false;
-let selected = []; // [{ci, ki, ii}]
+let selected = [];
 
 document.querySelectorAll('.col-legend-item').forEach((el, i) => {
   el.addEventListener('click', () => setFocusCol(i));
 });
 
 render();
-
-// ── Select mode functions ────────────────────────────────────
 
 function toggleSelectMode() {
   if (catEditMode) return;
@@ -1631,15 +1424,11 @@ function exitSelectMode() {
   render();
 }
 
-// Find current location of item by its unique key (ci + original text)
 function findItem(key) {
-  for (let ci = 0; ci < data.length; ci++) {
-    for (let ki = 0; ki < 3; ki++) {
-      for (let ii = 0; ii < data[ci].cols[ki].length; ii++) {
+  for (let ci = 0; ci < data.length; ci++)
+    for (let ki = 0; ki < 3; ki++)
+      for (let ii = 0; ii < data[ci].cols[ki].length; ii++)
         if (data[ci].cols[ki][ii]._key === key) return {ci, ki, ii};
-      }
-    }
-  }
   return null;
 }
 
@@ -1653,56 +1442,37 @@ function toggleChipSelect(ci, ki, ii) {
 }
 
 function updateBulkBar() {
-  const n = selected.length;
-  document.getElementById('bulk-count').textContent = n + ' נבחרו';
+  document.getElementById('bulk-count').textContent = selected.length + ' נבחרו';
 }
 
 function bulkAction(action) {
   if (selected.length === 0) return;
-  if (action === 'move') { showMoveRow(); return; }
-
-  // Resolve current positions
   const resolved = selected.map(k => findItem(k)).filter(Boolean);
-
   if (action === 'delete') {
     const sorted = resolved.sort((a,b) => b.ci-a.ci || b.ki-a.ki || b.ii-a.ii);
     sorted.forEach(({ci,ki,ii}) => data[ci].cols[ki].splice(ii,1));
     commit(resolved.length + ' הרגלים נמחקו');
     exitSelectMode(); return;
   }
-  if (action === 'focus') {
-    resolved.forEach(({ci,ki,ii}) => { data[ci].cols[ki][ii].f = 'focus'; });
-    commit('סומנו כמודגשים');
-  }
-  if (action === 'pause') {
-    resolved.forEach(({ci,ki,ii}) => { data[ci].cols[ki][ii].f = 'pause'; });
-    commit('הושהו');
-  }
+  if (action === 'focus') { resolved.forEach(({ci,ki,ii}) => { data[ci].cols[ki][ii].f = 'focus'; }); commit('סומנו כמודגשים'); }
+  if (action === 'pause') { resolved.forEach(({ci,ki,ii}) => { data[ci].cols[ki][ii].f = 'pause'; }); commit('הושהו'); }
   document.getElementById('bulk-done').style.display = 'block';
   persist(); render(); updateBulkBar();
 }
 
-function showMoveRow() {
-  document.getElementById('bulk-move-row').classList.add('show');
-}
-function hideMoveRow() {
-  document.getElementById('bulk-move-row').classList.remove('show');
-}
+function showMoveRow() { document.getElementById('bulk-move-row').classList.add('show'); }
+function hideMoveRow() { document.getElementById('bulk-move-row').classList.remove('show'); }
 
 function bulkMove(targetKi) {
   if (selected.length === 0) return;
   const resolved = selected.map(k => findItem(k)).filter(Boolean);
   const sorted = resolved.sort((a,b) => b.ci-a.ci || b.ki-a.ki || b.ii-a.ii);
-  sorted.forEach(({ci,ki,ii}) => {
-    const item = data[ci].cols[ki].splice(ii,1)[0];
-    data[ci].cols[targetKi].push(item);
-  });
+  sorted.forEach(({ci,ki,ii}) => { const item = data[ci].cols[ki].splice(ii,1)[0]; data[ci].cols[targetKi].push(item); });
   commit('הרגלים הועברו');
   hideMoveRow();
   document.getElementById('bulk-done').style.display = 'block';
   persist(); render(); updateBulkBar();
 }
-
 
 try {
   if (window.location.search.includes('t=')) {
@@ -1710,15 +1480,8 @@ try {
     toast.textContent = '✓';
     toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.5);background:#1c1c1e;color:#5ebd7e;font-size:48px;width:90px;height:90px;border-radius:24px;display:flex;align-items:center;justify-content:center;z-index:99999;opacity:0;transition:all 0.2s cubic-bezier(0.34,1.4,0.64,1);box-shadow:0 8px 32px rgba(0,0,0,0.6);pointer-events:none;';
     document.body.appendChild(toast);
-    requestAnimationFrame(() => {
-      toast.style.opacity = '1';
-      toast.style.transform = 'translate(-50%,-50%) scale(1)';
-    });
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translate(-50%,-50%) scale(0.8)';
-      setTimeout(() => toast.remove(), 300);
-    }, 1200);
+    requestAnimationFrame(() => { toast.style.opacity = '1'; toast.style.transform = 'translate(-50%,-50%) scale(1)'; });
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translate(-50%,-50%) scale(0.8)'; setTimeout(() => toast.remove(), 300); }, 1200);
     try { window.history.replaceState(null, '', window.location.pathname); } catch(e) {}
   }
 } catch(e) {}
